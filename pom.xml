@@ -107,6 +107,19 @@
         </dependencies>
     </dependencyManagement>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>github</id>
+            <name>GitHub doytowin Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/doytowin/doyto-query</url>
+        </snapshotRepository>
+        <repository>
+            <id>github</id>
+            <name>GitHub doytowin Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/doytowin/doyto-query</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <sourceDirectory>${sourceDirectory}</sourceDirectory>
         <testResources>

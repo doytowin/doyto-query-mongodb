@@ -29,6 +29,10 @@
     <artifactId>doyto-query-mongodb</artifactId>
     <name>doyto-query-mongodb</name>
 
+    <properties>
+        <skipDeploy>false</skipDeploy>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -40,7 +44,7 @@
         <dependency>
             <groupId>win.doyto</groupId>
             <artifactId>doyto-query-common</artifactId>
-            <version>${revision}</version>
+            <version>${doyto-query.version}</version>
         </dependency>
         <!-- MongoDB -->
         <dependency>
@@ -51,7 +55,7 @@
         <dependency>
             <groupId>win.doyto</groupId>
             <artifactId>doyto-query-test</artifactId>
-            <version>${revision}</version>
+            <version>${doyto-query.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

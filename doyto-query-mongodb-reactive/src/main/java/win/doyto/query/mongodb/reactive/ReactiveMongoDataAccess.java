@@ -18,7 +18,6 @@ package win.doyto.query.mongodb.reactive;
 
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoCollection;
-import com.mongodb.reactivestreams.client.MongoDatabase;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
@@ -28,11 +27,13 @@ import reactor.core.publisher.Mono;
 import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.core.IdWrapper;
 import win.doyto.query.entity.Persistable;
+import win.doyto.query.mongodb.aggregation.AggregationMetadata;
 import win.doyto.query.mongodb.filter.MongoFilterBuilder;
 import win.doyto.query.reactive.core.ReactiveDataAccess;
+import win.doyto.query.util.BeanUtil;
 
 import java.io.Serializable;
-import javax.persistence.Entity;
+import java.util.List;
 
 /**
  * ReactiveMongoDataAccess
@@ -43,11 +44,14 @@ import javax.persistence.Entity;
 public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Serializable, Q extends DoytoQuery> implements ReactiveDataAccess<E, I, Q> {
     @Getter
     private final MongoCollection<Document> collection;
+    private final Class<E> entityClass;
+    private final AggregationMetadata<MongoCollection<Document>> md;
 
     public ReactiveMongoDataAccess(MongoClient mongoClient, Class<E> entityClass) {
-        Entity entityAnno = entityClass.getAnnotation(Entity.class);
-        MongoDatabase database = mongoClient.getDatabase(entityAnno.database());
-        this.collection = database.getCollection(entityAnno.name());
+        this.entityClass = entityClass;
+        CollectionProvider collectionProvider = new CollectionProvider(mongoClient);
+        this.md = AggregationMetadata.build(entityClass, collectionProvider);
+        this.collection = md.getCollection();
     }
 
     @Override
@@ -57,7 +61,9 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
 
     @Override
     public Flux<E> query(Q q) {
-        return null;
+        List<Bson> pipeline = md.buildAggregation(q);
+        return Flux.from(md.getCollection().aggregate(pipeline))
+                   .map(document -> BeanUtil.parse(document.toJson(), entityClass));
     }
 
     @Override

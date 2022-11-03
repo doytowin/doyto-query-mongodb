@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.test.inventory;
+package win.doyto.query.mongodb.test.menu;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.PageQuery;
+import win.doyto.query.mongodb.entity.MongoPersistable;
+
+import java.math.BigInteger;
 
 /**
- * InventoryQuery
+ * MenuView
  *
- * @author f0rb on 2021-11-23
+ * @author f0rb on 2022-05-21
+ * @since 1.0.0
  */
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@SuperBuilder
-public class InventoryQuery extends PageQuery {
-
-    private String itemContain;
-    private String status;
-    private SizeQuery size;
-    private ConditionOr condition;
-
+public class MenuView extends MongoPersistable<BigInteger> {
+    private String menuName;
+    private String menuCode;
+    private Boolean valid;
 }

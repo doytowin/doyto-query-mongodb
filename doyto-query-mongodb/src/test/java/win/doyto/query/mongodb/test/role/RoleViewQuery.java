@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.test.inventory;
+package win.doyto.query.mongodb.test.role;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,22 +22,26 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import win.doyto.query.core.PageQuery;
+import win.doyto.query.core.RelationalQuery;
+
+import java.math.BigInteger;
 
 /**
- * InventoryQuery
+ * RoleViewQuery
  *
- * @author f0rb on 2021-11-23
+ * @author f0rb on 2022/8/28
+ * @since 1.0.0
  */
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @SuperBuilder
-public class InventoryQuery extends PageQuery {
+@AllArgsConstructor
+@NoArgsConstructor
+public class RoleViewQuery extends PageQuery implements RelationalQuery<RoleView, BigInteger> {
+    private Boolean valid;
 
-    private String itemContain;
-    private String status;
-    private SizeQuery size;
-    private ConditionOr condition;
-
+    @Override
+    public Class<RoleView> getDomainClass() {
+        return RoleView.class;
+    }
 }

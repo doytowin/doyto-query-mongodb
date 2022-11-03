@@ -26,8 +26,8 @@
         <version>2</version>
     </parent>
 
-    <artifactId>doyto-query-parent</artifactId>
-    <name>DoytoQuery</name>
+    <artifactId>doyto-query-mongodb-parent</artifactId>
+    <name>DoytoQueryMongoDB</name>
     <packaging>pom</packaging>
     <version>${revision}</version>
     <url>https://query.doyto.win/</url>
@@ -35,27 +35,19 @@
     <properties>
         <revision>1.0.0-SNAPSHOT</revision>
 
-        <spring-boot.version>2.7.1</spring-boot.version>
+        <spring-boot.version>2.7.5</spring-boot.version>
+        <embedded-mongo.version>3.5.1</embedded-mongo.version>
+        <doyto-query.version>1.0.0-BETA</doyto-query.version>
 
         <sourceDirectory>src/main/java</sourceDirectory>
-        <skipDeploy>false</skipDeploy>
+        <skipDeploy>true</skipDeploy>
 
         <jacoco.destFile>${user.dir}/target/jacoco.exec</jacoco.destFile>
         <jacoco.dataFile>${user.dir}/target/jacoco.exec</jacoco.dataFile>
     </properties>
 
     <modules>
-        <module>doyto-query-test</module>
-        <module>doyto-query-geo</module>
-        <module>doyto-query-api</module>
-        <module>doyto-query-common</module>
-        <module>doyto-query-memory</module>
-        <module>doyto-query-sql</module>
-        <module>doyto-query-web-common</module>
-        <module>doyto-query-web</module>
-        <module>doyto-query-jdbc</module>
         <module>doyto-query-mongodb</module>
-        <module>doyto-query-integration-test</module>
     </modules>
 
     <dependencies>
@@ -100,28 +92,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-            <dependency>
-                <groupId>win.doyto</groupId>
-                <artifactId>doyto-query-api</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>win.doyto</groupId>
-                <artifactId>doyto-query-common</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>win.doyto</groupId>
-                <artifactId>doyto-query-sql</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>win.doyto</groupId>
-                <artifactId>doyto-query-test</artifactId>
-                <version>${revision}</version>
-                <scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -165,7 +135,6 @@
                 </configuration>
             </plugin>
 
-            <!-- 更新pom版本号-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>

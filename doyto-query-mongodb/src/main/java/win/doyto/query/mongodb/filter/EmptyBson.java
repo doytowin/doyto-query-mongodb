@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.test.inventory;
+package win.doyto.query.mongodb.filter;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.PageQuery;
+import org.bson.BsonDocument;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
 
 /**
- * InventoryQuery
+ * EmptyBson
  *
- * @author f0rb on 2021-11-23
+ * @author f0rb on 2022/10/24
+ * @since 1.0.0
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@SuperBuilder
-public class InventoryQuery extends PageQuery {
-
-    private String itemContain;
-    private String status;
-    private SizeQuery size;
-    private ConditionOr condition;
-
+public class EmptyBson implements Bson {
+    @Override
+    public <D> BsonDocument toBsonDocument(Class<D> aClass, CodecRegistry codecRegistry) {
+        return new BsonDocument();
+    }
 }

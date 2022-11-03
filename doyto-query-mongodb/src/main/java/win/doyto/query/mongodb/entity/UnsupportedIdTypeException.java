@@ -14,30 +14,15 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.test.inventory;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.PageQuery;
+package win.doyto.query.mongodb.entity;
 
 /**
- * InventoryQuery
+ * UnsupportedIdTypeException
  *
- * @author f0rb on 2021-11-23
+ * @author f0rb on 2022-07-20
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@SuperBuilder
-public class InventoryQuery extends PageQuery {
-
-    private String itemContain;
-    private String status;
-    private SizeQuery size;
-    private ConditionOr condition;
-
+public class UnsupportedIdTypeException extends RuntimeException {
+    public UnsupportedIdTypeException(Class<?> type) {
+        super("Unsupported type for ObjectId: " + type.getName());
+    }
 }

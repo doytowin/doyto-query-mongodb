@@ -16,28 +16,27 @@
 
 package win.doyto.query.mongodb.test.inventory;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.PageQuery;
+import win.doyto.query.core.RelationalQuery;
+import win.doyto.query.mongodb.test.aggregate.QuantityView;
 
 /**
- * InventoryQuery
+ * QuantityViewQuery
  *
- * @author f0rb on 2021-11-23
+ * @author f0rb on 2022/8/28
+ * @since 1.0.0
  */
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @SuperBuilder
-public class InventoryQuery extends PageQuery {
+public class QuantityViewQuery extends InventoryQuery implements RelationalQuery<QuantityView, String> {
 
-    private String itemContain;
-    private String status;
-    private SizeQuery size;
-    private ConditionOr condition;
-
+    @Override
+    public Class<QuantityView> getDomainClass() {
+        return QuantityView.class;
+    }
 }

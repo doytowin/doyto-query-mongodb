@@ -22,10 +22,7 @@ import org.bson.Document;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.test.StepVerifier;
 import win.doyto.query.mongodb.test.inventory.InventoryEntity;
@@ -42,9 +39,7 @@ import java.util.List;
  * @author f0rb on 2021-12-26
  */
 @ActiveProfiles("test")
-@DataMongoTest(properties = {"spring.mongodb.embedded.version=3.5.5"})
-@SpringBootApplication
-@Import(EmbeddedMongoAutoConfiguration.class)
+@SpringBootTest
 class ReactiveMongoDataAccessTest {
     private static boolean initialized;
     private static ReactiveMongoDataAccess<InventoryEntity, String, InventoryQuery> inventoryDataAccess;

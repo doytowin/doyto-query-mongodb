@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import win.doyto.query.core.DoytoQuery;
@@ -34,6 +35,9 @@ import win.doyto.query.util.BeanUtil;
 
 import java.io.Serializable;
 import java.util.List;
+
+import static com.mongodb.client.model.Filters.eq;
+import static win.doyto.query.mongodb.MongoConstant.MONGO_ID;
 
 /**
  * ReactiveMongoDataAccess
@@ -84,12 +88,17 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
 
     @Override
     public Mono<E> get(I id) {
-        return null;
+        return get(IdWrapper.build(id));
+    }
+
+    private Bson getIdFilter(Object id) {
+        return eq(MONGO_ID, new ObjectId(id.toString()));
     }
 
     @Override
     public Mono<E> get(IdWrapper<I> w) {
-        return null;
+        return Mono.from(collection.find(getIdFilter(w.getId())))
+                   .map(document -> BeanUtil.parse(document.toJson(), entityClass));
     }
 
     @Override

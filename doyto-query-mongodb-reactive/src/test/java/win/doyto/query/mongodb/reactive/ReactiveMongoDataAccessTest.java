@@ -79,4 +79,18 @@ class ReactiveMongoDataAccessTest {
             .verifyComplete();
     }
 
+    @Test
+    void get() {
+        InventoryQuery query = InventoryQuery.builder().build();
+        String id = inventoryDataAccess.query(query).blockFirst().getId();
+        inventoryDataAccess.get(id)
+            .as(StepVerifier::create)
+            .expectNextMatches(inventoryEntity ->
+                inventoryEntity.getItem().equals("journal")
+                    && inventoryEntity.getQty().equals(25)
+                    && inventoryEntity.getSize().getH().equals(14.0)
+            )
+            .verifyComplete();
+    }
+
 }

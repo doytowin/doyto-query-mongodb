@@ -48,6 +48,7 @@
 
     <modules>
         <module>doyto-query-mongodb</module>
+        <module>doyto-query-mongodb-reactive</module>
     </modules>
 
     <dependencies>

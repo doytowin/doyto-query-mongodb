@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.reactive;
+package win.doyto.query.mongodb.reactive.session;
 
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoCollection;
@@ -26,13 +26,13 @@ import java.util.function.Function;
 import javax.persistence.Entity;
 
 /**
- * CollectionProvider
+ * ReactiveCollectionProvider
  *
  * @author f0rb on 2022/7/20
  * @since 1.0.0
  */
 @AllArgsConstructor
-public class CollectionProvider implements Function<Class<?>, MongoCollection<Document>> {
+public class ReactiveCollectionProvider implements Function<Class<?>, MongoCollection<Document>> {
     private MongoClient mongoClient;
 
     @Override

@@ -30,6 +30,9 @@ import win.doyto.query.core.IdWrapper;
 import win.doyto.query.entity.Persistable;
 import win.doyto.query.mongodb.aggregation.AggregationMetadata;
 import win.doyto.query.mongodb.filter.MongoFilterBuilder;
+import win.doyto.query.mongodb.reactive.session.ReactiveCollectionProvider;
+import win.doyto.query.mongodb.reactive.session.ReactiveSessionSupplier;
+import win.doyto.query.mongodb.reactive.session.ReactiveSessionThreadLocalSupplier;
 import win.doyto.query.reactive.core.ReactiveDataAccess;
 import win.doyto.query.util.BeanUtil;
 
@@ -50,10 +53,16 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
     private final MongoCollection<Document> collection;
     private final Class<E> entityClass;
     private final AggregationMetadata<MongoCollection<Document>> md;
+    private final ReactiveSessionSupplier reactiveSessionSupplier;
 
     public ReactiveMongoDataAccess(MongoClient mongoClient, Class<E> entityClass) {
+        this(entityClass, ReactiveSessionThreadLocalSupplier.create(mongoClient));
+    }
+
+    public ReactiveMongoDataAccess(Class<E> entityClass, ReactiveSessionSupplier reactiveSessionSupplier) {
         this.entityClass = entityClass;
-        CollectionProvider collectionProvider = new CollectionProvider(mongoClient);
+        this.reactiveSessionSupplier = reactiveSessionSupplier;
+        ReactiveCollectionProvider collectionProvider = new ReactiveCollectionProvider(reactiveSessionSupplier.getMongoClient());
         this.md = AggregationMetadata.build(entityClass, collectionProvider);
         this.collection = md.getCollection();
     }
@@ -66,7 +75,7 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
     @Override
     public Flux<E> query(Q q) {
         List<Bson> pipeline = md.buildAggregation(q);
-        return Flux.from(md.getCollection().aggregate(pipeline))
+        return Flux.from(md.getCollection().aggregate(reactiveSessionSupplier.get(), pipeline))
                    .map(document -> BeanUtil.parse(document.toJson(), entityClass));
     }
 
@@ -83,7 +92,7 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
     @Override
     public Mono<Long> count(Q q) {
         Bson filter = MongoFilterBuilder.buildFilter(q);
-        return (Mono<Long>) collection.countDocuments(filter);
+        return (Mono<Long>) collection.countDocuments(reactiveSessionSupplier.get(), filter);
     }
 
     @Override
@@ -97,7 +106,7 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
 
     @Override
     public Mono<E> get(IdWrapper<I> w) {
-        return Mono.from(collection.find(getIdFilter(w.getId())))
+        return Mono.from(collection.find(reactiveSessionSupplier.get(), getIdFilter(w.getId())))
                    .map(document -> BeanUtil.parse(document.toJson(), entityClass));
     }
 

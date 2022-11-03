@@ -5,10 +5,8 @@ on:
   push:
     branches:
       - main
-      - modules/jdbc
-      - modules/mongodb
       - 'modules/**'
-      - 'features/**'
+      - 'reactive/**'
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -26,7 +24,7 @@ jobs:
           java-version: 11
           distribution: 'adopt'
       - name: Cache SonarCloud packages
-        uses: actions/cache@v3.0.5
+        uses: actions/cache@v3.0.11
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
@@ -44,9 +42,8 @@ jobs:
         run: |
           mvn -B clean test && \
           mvn -B jacoco:report sonar:sonar \
-          -Dsonar.projectKey=win.doyto:doyto-query \
-          -Dsonar.projectName=doyto-query \
-          -Dsonar.exclusions=doyto-query-test/**,doyto-query-integration-test/**,**/pom.xml
+          -Dsonar.projectKey=win.doyto:doyto-query-mongodb \
+          -Dsonar.projectName=doyto-query-mongodb
       - name: Set up JDK 8
         if: ${{ github.ref == 'refs/heads/release' }}
         uses: actions/setup-java@v3

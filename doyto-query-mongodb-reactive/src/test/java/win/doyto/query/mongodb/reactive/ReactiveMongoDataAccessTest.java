@@ -93,4 +93,19 @@ class ReactiveMongoDataAccessTest {
             .verifyComplete();
     }
 
+    @Test
+    void queryColumns() {
+        InventoryQuery query = InventoryQuery.builder().build();
+        inventoryDataAccess.queryColumns(query, InventoryEntity.class, "item", "size.h")
+                           .as(StepVerifier::create)
+                           .expectNextMatches(inventoryEntity -> inventoryEntity.getItem().equals("journal")
+                                    && inventoryEntity.getQty() == null
+                                    && inventoryEntity.getStatus() == null
+                                    && inventoryEntity.getSize().getH().equals(14.0)
+                                    && inventoryEntity.getSize().getW() == null
+                                    && inventoryEntity.getSize().getUom() == null
+                           ).expectNextCount(4L)
+                           .verifyComplete();
+    }
+
 }

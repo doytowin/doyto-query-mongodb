@@ -16,6 +16,8 @@
 
 package win.doyto.query.mongodb.reactive;
 
+import com.mongodb.client.model.Projections;
+import com.mongodb.reactivestreams.client.FindPublisher;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import lombok.Getter;
@@ -80,8 +82,11 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
     }
 
     @Override
-    public <V> Flux<V> queryColumns(Q q, Class<V> clazz, String... columns) {
-        return null;
+    public <V> Flux<V> queryColumns(Q query, Class<V> clazz, String... columns) {
+        FindPublisher<Document> findIterable = collection
+                .find(reactiveSessionSupplier.get(), MongoFilterBuilder.buildFilter(query))
+                .projection(Projections.include(columns));
+        return Flux.from(findIterable).map(document -> BeanUtil.parse(document.toJson(), clazz));
     }
 
     @Override

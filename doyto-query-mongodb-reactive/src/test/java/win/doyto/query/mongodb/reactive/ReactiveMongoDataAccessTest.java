@@ -117,4 +117,16 @@ class ReactiveMongoDataAccessTest {
                            .verifyComplete();
     }
 
+    @Test
+    void queryColumnsWithSorting() {
+        InventoryQuery query = InventoryQuery.builder().sort("qty,desc").build();
+        inventoryDataAccess.queryColumns(query, InventoryEntity.class, "item", "qty")
+                           .as(StepVerifier::create)
+                           .expectNextMatches(inventoryEntity
+                                   -> inventoryEntity.getItem().equals("paper")
+                                   && inventoryEntity.getQty() == 100
+                           ).expectNextCount(4L)
+                           .verifyComplete();
+    }
+
 }

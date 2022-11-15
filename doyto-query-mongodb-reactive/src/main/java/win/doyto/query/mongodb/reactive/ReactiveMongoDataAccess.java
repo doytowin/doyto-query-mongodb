@@ -84,14 +84,17 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
 
     @Override
     public <V> Flux<V> queryColumns(Q query, Class<V> clazz, String... columns) {
-        FindPublisher<Document> findIterable = collection
+        FindPublisher<Document> findPublisher = collection
                 .find(reactiveSessionSupplier.get(), MongoFilterBuilder.buildFilter(query))
                 .projection(Projections.include(columns));
         if (query.needPaging()) {
             int offset = GlobalConfiguration.calcOffset(query);
-            findIterable.skip(offset).limit(query.getPageSize());
+            findPublisher.skip(offset).limit(query.getPageSize());
         }
-        return Flux.from(findIterable).map(document -> BeanUtil.parse(document.toJson(), clazz));
+        if (query.getSort() != null) {
+            findPublisher.sort(MongoFilterBuilder.buildSort(query.getSort()));
+        }
+        return Flux.from(findPublisher).map(document -> BeanUtil.parse(document.toJson(), clazz));
     }
 
     @Override

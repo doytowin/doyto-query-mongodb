@@ -22,6 +22,7 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -41,6 +42,7 @@ import win.doyto.query.reactive.core.ReactiveDataAccess;
 import win.doyto.query.util.BeanUtil;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -101,7 +103,11 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
     private <V> V convert(Class<V> clazz, String[] columns, Document document) {
         V e;
         if (columns.length == 1) {
-            e = document.get(columns[0], clazz);
+            if (columns[0].contains(".")) {
+                e = document.getEmbedded(splitToKeys(columns[0]), clazz);
+            } else {
+                e = document.get(columns[0], clazz);
+            }
         } else {
             e = BeanUtil.parse(document.toJson(), clazz);
         }
@@ -109,6 +115,10 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
             log.debug("Entity parsed: {}", BeanUtil.stringify(e));
         }
         return e;
+    }
+
+    private List<String> splitToKeys(String column) {
+        return Arrays.asList(StringUtils.split(column, "."));
     }
 
     @Override

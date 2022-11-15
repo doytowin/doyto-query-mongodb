@@ -140,5 +140,13 @@ class ReactiveMongoDataAccessTest {
                            .expectNextSequence(ids)
                            .verifyComplete();
     }
+    @Test
+    void queryNestedSingleColumn() {
+        InventoryQuery query = InventoryQuery.builder().pageSize(1).build();
+        inventoryDataAccess.queryColumns(query, String.class, "size.uom")
+                           .as(StepVerifier::create)
+                           .expectNextMatches(uom -> uom.equals("cm"))
+                           .verifyComplete();
+    }
 
 }

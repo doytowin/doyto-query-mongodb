@@ -108,4 +108,13 @@ class ReactiveMongoDataAccessTest {
                            .verifyComplete();
     }
 
+    @Test
+    void queryColumnsWithPaging() {
+        InventoryQuery query = InventoryQuery.builder().pageNumber(2).pageSize(3).build();
+        inventoryDataAccess.queryColumns(query, InventoryEntity.class, "item", "size.h")
+                           .as(StepVerifier::create)
+                           .expectNextCount(2L)
+                           .verifyComplete();
+    }
+
 }

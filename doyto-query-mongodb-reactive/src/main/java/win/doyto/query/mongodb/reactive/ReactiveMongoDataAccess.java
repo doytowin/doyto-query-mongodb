@@ -27,6 +27,7 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import win.doyto.query.config.GlobalConfiguration;
 import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.core.IdWrapper;
 import win.doyto.query.entity.Persistable;
@@ -86,6 +87,10 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
         FindPublisher<Document> findIterable = collection
                 .find(reactiveSessionSupplier.get(), MongoFilterBuilder.buildFilter(query))
                 .projection(Projections.include(columns));
+        if (query.needPaging()) {
+            int offset = GlobalConfiguration.calcOffset(query);
+            findIterable.skip(offset).limit(query.getPageSize());
+        }
         return Flux.from(findIterable).map(document -> BeanUtil.parse(document.toJson(), clazz));
     }
 

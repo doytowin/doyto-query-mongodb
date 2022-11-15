@@ -32,6 +32,7 @@ import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.core.IdWrapper;
 import win.doyto.query.entity.Persistable;
 import win.doyto.query.mongodb.aggregation.AggregationMetadata;
+import win.doyto.query.mongodb.entity.ObjectIdMapper;
 import win.doyto.query.mongodb.filter.MongoFilterBuilder;
 import win.doyto.query.mongodb.reactive.session.ReactiveCollectionProvider;
 import win.doyto.query.mongodb.reactive.session.ReactiveSessionSupplier;
@@ -94,12 +95,26 @@ public class ReactiveMongoDataAccess<E extends Persistable<I>, I extends Seriali
         if (query.getSort() != null) {
             findPublisher.sort(MongoFilterBuilder.buildSort(query.getSort()));
         }
-        return Flux.from(findPublisher).map(document -> BeanUtil.parse(document.toJson(), clazz));
+        return Flux.from(findPublisher).map(document -> convert(clazz, columns, document));
+    }
+
+    private <V> V convert(Class<V> clazz, String[] columns, Document document) {
+        V e;
+        if (columns.length == 1) {
+            e = document.get(columns[0], clazz);
+        } else {
+            e = BeanUtil.parse(document.toJson(), clazz);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Entity parsed: {}", BeanUtil.stringify(e));
+        }
+        return e;
     }
 
     @Override
     public Flux<I> queryIds(Q q) {
-        return null;
+        return queryColumns(q, ObjectId.class, MONGO_ID)
+                .map(objectId -> ObjectIdMapper.convert(entityClass, objectId));
     }
 
     @Override

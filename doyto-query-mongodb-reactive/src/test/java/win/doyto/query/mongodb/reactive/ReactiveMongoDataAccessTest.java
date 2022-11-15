@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.test.StepVerifier;
+import win.doyto.query.mongodb.entity.MongoPersistable;
 import win.doyto.query.mongodb.test.inventory.InventoryEntity;
 import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 import win.doyto.query.mongodb.test.inventory.SizeQuery;
@@ -126,6 +127,17 @@ class ReactiveMongoDataAccessTest {
                                    -> inventoryEntity.getItem().equals("paper")
                                    && inventoryEntity.getQty() == 100
                            ).expectNextCount(4L)
+                           .verifyComplete();
+    }
+
+    @Test
+    void queryIds() {
+        InventoryQuery query = InventoryQuery.builder().build();
+        List<String> ids = inventoryDataAccess.query(query)
+                                              .map(MongoPersistable::getId).buffer().blockFirst();
+        inventoryDataAccess.queryIds(query)
+                           .as(StepVerifier::create)
+                           .expectNextSequence(ids)
                            .verifyComplete();
     }
 

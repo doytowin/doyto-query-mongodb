@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>win.doyto</groupId>
-        <artifactId>doyto-query-mongodb-parent</artifactId>
+        <artifactId>doyto-query-mongodb-repo</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -61,6 +61,7 @@
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
+            <version>${embedded-mongo.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

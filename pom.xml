@@ -26,8 +26,8 @@
         <version>2</version>
     </parent>
 
-    <artifactId>doyto-query-mongodb-parent</artifactId>
-    <name>DoytoQueryMongoDB</name>
+    <artifactId>doyto-query-mongodb-repo</artifactId>
+    <name>DoytoQueryMongoDBRepository</name>
     <packaging>pom</packaging>
     <version>${revision}</version>
     <url>https://query.doyto.win/</url>
@@ -36,8 +36,8 @@
         <revision>1.0.0-SNAPSHOT</revision>
 
         <spring-boot.version>2.7.5</spring-boot.version>
-        <embedded-mongo.version>3.5.1</embedded-mongo.version>
-        <doyto-query.version>1.0.0-BETA</doyto-query.version>
+        <embedded-mongo.version>3.5.2</embedded-mongo.version>
+        <doyto-query.version>1.0.0-SNAPSHOT</doyto-query.version>
 
         <sourceDirectory>src/main/java</sourceDirectory>
         <skipDeploy>true</skipDeploy>
@@ -48,6 +48,7 @@
 
     <modules>
         <module>doyto-query-mongodb</module>
+        <module>doyto-query-mongodb-spring-tx</module>
     </modules>
 
     <dependencies>

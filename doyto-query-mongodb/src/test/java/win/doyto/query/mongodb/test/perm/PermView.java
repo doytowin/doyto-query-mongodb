@@ -41,6 +41,6 @@ public class PermView extends MongoPersistable<BigInteger> {
     private Boolean valid;
 
     // many-to-many
-    @DomainPath({"user", "role", "perm"})
+    @DomainPath({"perm", "~", "role", "~", "user"})
     private List<UserView> users;
 }

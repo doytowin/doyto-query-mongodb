@@ -25,6 +25,7 @@ import win.doyto.query.config.GlobalConfiguration;
 import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.mongodb.filter.EmptyBson;
 import win.doyto.query.mongodb.filter.MongoFilterBuilder;
+import win.doyto.query.relation.DomainPathDetail;
 import win.doyto.query.util.ColumnUtil;
 
 import java.lang.reflect.Field;
@@ -61,26 +62,21 @@ public class DomainPathBuilder {
             String tableName = String.format(TABLE_FORMAT, paths[0]);
             return lookup0(tableName, domainPath.localField(), domainPath.foreignField(), Collections.singletonList(project(projectDoc)), viewName);
         }
-        return buildLookupForManyToMany(query, field.getName(), paths, projectDoc);
+        return buildLookupForManyToMany(query, field.getName(), domainPath, projectDoc);
     }
 
     @SuppressWarnings("java:S117")
-    private static Bson buildLookupForManyToMany(DoytoQuery query, String viewName, String[] paths, Document projectDoc) {
-        int n = paths.length - 1;
+    private static Bson buildLookupForManyToMany(DoytoQuery query, String viewName, DomainPath domainPathAnno, Document projectDoc) {
+        DomainPathDetail domainPathDetail = DomainPathDetail.buildBy(domainPathAnno);
+
+        int n = domainPathDetail.getDomainPath().length - 1;
         String $viewName = "$" + viewName;
 
-        boolean needReverse = viewName.contains(paths[0]);
-        String[] joints = IntStream.range(0, n).mapToObj(i -> String.format(JOIN_TABLE_FORMAT, paths[i], paths[i + 1]))
-                                   .toArray(String[]::new);
-        if (needReverse) {
-            ArrayUtils.reverse(paths);
-            ArrayUtils.reverse(joints);
-        }
-        String[] tableNames = Arrays.stream(paths).map(path -> String.format(TABLE_FORMAT, path)).toArray(String[]::new);
-        String[] joinIds = Arrays.stream(paths).map(path -> String.format(JOIN_ID_FORMAT, path)).toArray(String[]::new);
+        String[] joinIds = domainPathDetail.getJoinIds();
+        String[] joints = domainPathDetail.getJoinTables();
 
         List<Bson> pipeline = new LinkedList<>();
-        pipeline.add(lookup0(tableNames[n], joinIds[n], MONGO_ID, Collections.emptyList(), viewName));
+        pipeline.add(lookup0(domainPathDetail.getTargetTable(), joinIds[n], MONGO_ID, Collections.emptyList(), viewName));
         pipeline.add(unwind($viewName));
         pipeline.add(replaceRoot($viewName));
         Bson filter = MongoFilterBuilder.buildFilter(query);

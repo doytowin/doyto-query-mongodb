@@ -1,56 +1,56 @@
 [
   {
-    $lookup: {
-      from: "a_user_and_role",
-      localField: "_id",
-      foreignField: "user_id",
-      pipeline: [
+    "$lookup": {
+      "from": "a_user_and_role",
+      "localField": "_id",
+      "foreignField": "user_id",
+      "pipeline": [
         {
-          $lookup: {
-            from: "t_role",
-            localField: "role_id",
-            foreignField: "_id",
-            as: "roles"
+          "$lookup": {
+            "from": "t_role",
+            "localField": "role_id",
+            "foreignField": "_id",
+            "as": "roles"
           }
         },
         {
-          $unwind: "$roles"
+          "$unwind": "$roles"
         },
         {
-          $replaceRoot: {
-            newRoot: "$roles"
+          "$replaceRoot": {
+            "newRoot": "$roles"
           }
         },
         {
-          $project: {
+          "$project": {
             "roleName": 1,
             "roleCode": 1,
             "valid": 1
           }
         }
       ],
-      as: "roles"
+      "as": "roles"
     }
   },
   {
-    $sort: {
+    "$sort": {
       "_id": 1
     }
   },
   {
-    $project: {
-      createUser: {
+    "$project": {
+      "createUser": {
         "$arrayElemAt": [
           "$createUser",
           0
         ]
       },
-      createdUsers: "$createdUsers",
-      username: "$username",
-      email: "$email",
-      roles: "$roles",
-      perms: "$perms",
-      menus: "$menus"
+      "createdUsers": "$createdUsers",
+      "username": "$username",
+      "email": "$email",
+      "roles": "$roles",
+      "perms": "$perms",
+      "menus": "$menus"
     }
   }
 ]

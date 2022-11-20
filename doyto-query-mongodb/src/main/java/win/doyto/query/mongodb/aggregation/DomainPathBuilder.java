@@ -17,7 +17,6 @@
 package win.doyto.query.mongodb.aggregation;
 
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.ArrayUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import win.doyto.query.annotation.DomainPath;
@@ -33,7 +32,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static com.mongodb.client.model.Aggregates.*;
 import static win.doyto.query.mongodb.MongoConstant.MONGO_ID;
@@ -45,9 +43,7 @@ import static win.doyto.query.mongodb.MongoConstant.MONGO_ID;
  */
 @UtilityClass
 public class DomainPathBuilder {
-    private static final String JOIN_ID_FORMAT = GlobalConfiguration.instance().getJoinIdFormat();
     private static final String TABLE_FORMAT = GlobalConfiguration.instance().getTableFormat();
-    private static final String JOIN_TABLE_FORMAT = GlobalConfiguration.instance().getJoinTableFormat();
     private static final int PROJECTING = 1;
 
     public static <V> Bson buildLookUpForSubDomain(DoytoQuery query, Class<V> viewClass, Field field) {
@@ -68,12 +64,11 @@ public class DomainPathBuilder {
     @SuppressWarnings("java:S117")
     private static Bson buildLookupForManyToMany(DoytoQuery query, String viewName, DomainPath domainPathAnno, Document projectDoc) {
         DomainPathDetail domainPathDetail = DomainPathDetail.buildBy(domainPathAnno);
-
-        int n = domainPathDetail.getDomainPath().length - 1;
         String $viewName = "$" + viewName;
 
         String[] joinIds = domainPathDetail.getJoinIds();
         String[] joints = domainPathDetail.getJoinTables();
+        int n = joinIds.length - 1;
 
         List<Bson> pipeline = new LinkedList<>();
         pipeline.add(lookup0(domainPathDetail.getTargetTable(), joinIds[n], MONGO_ID, Collections.emptyList(), viewName));
@@ -115,29 +110,24 @@ public class DomainPathBuilder {
     }
 
     @SuppressWarnings("java:S117")
-    public static Bson buildLookUpForNestedQuery(String viewName, DomainPath domainPath) {
-        String[] paths = domainPath.value();
+    public static Bson buildLookUpForNestedQuery(String viewName, DomainPath domainPathAnno) {
+        String[] paths = domainPathAnno.value();
         if (paths.length == 1) {
             String tableName = String.format(TABLE_FORMAT, paths[0]);
             // one-to-many
-            return lookup0(tableName, domainPath.localField(), MONGO_ID, Collections.emptyList(), viewName);
+            return lookup0(tableName, domainPathAnno.localField(), MONGO_ID, Collections.emptyList(), viewName);
         }
 
-        int n = paths.length - 1;
         String $viewName = "$" + viewName;
 
-        boolean needReverse = viewName.contains(paths[0]);
-        String[] joints = IntStream.range(0, n).mapToObj(i -> String.format(JOIN_TABLE_FORMAT, paths[i], paths[i + 1]))
-                                   .toArray(String[]::new);
-        if (needReverse) {
-            ArrayUtils.reverse(paths);
-            ArrayUtils.reverse(joints);
-        }
-        String[] tableNames = Arrays.stream(paths).map(path -> String.format(TABLE_FORMAT, path)).toArray(String[]::new);
-        String[] joinIds = Arrays.stream(paths).map(path -> String.format(JOIN_ID_FORMAT, path)).toArray(String[]::new);
+        DomainPathDetail domainPathDetail = DomainPathDetail.buildBy(domainPathAnno);
+        String[] joints = domainPathDetail.getJoinTables();
+        String[] joinIds = domainPathDetail.getJoinIds();
+        String targetTableName = domainPathDetail.getTargetTable();
+        int n = joinIds.length - 1;
 
         List<Bson> pipeline = Arrays.asList(
-                lookup0(tableNames[n], joinIds[n], MONGO_ID, Collections.emptyList(), viewName),
+                lookup0(targetTableName, joinIds[n], MONGO_ID, Collections.emptyList(), viewName),
                 replaceRoot(new Document("$arrayElemAt", Arrays.asList($viewName, 0)))
         );
 

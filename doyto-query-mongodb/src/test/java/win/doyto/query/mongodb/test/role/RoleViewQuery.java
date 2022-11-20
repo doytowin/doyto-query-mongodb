@@ -21,8 +21,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.core.PageQuery;
 import win.doyto.query.core.RelationalQuery;
+import win.doyto.query.mongodb.test.user.UserViewQuery;
 
 import java.math.BigInteger;
 
@@ -39,6 +41,9 @@ import java.math.BigInteger;
 @NoArgsConstructor
 public class RoleViewQuery extends PageQuery implements RelationalQuery<RoleView, BigInteger> {
     private Boolean valid;
+
+    @DomainPath({"role", "~", "user"})
+    private UserViewQuery userViewQuery;
 
     @Override
     public Class<RoleView> getDomainClass() {

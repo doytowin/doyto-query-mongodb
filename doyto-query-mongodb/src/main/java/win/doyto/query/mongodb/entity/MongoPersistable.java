@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.types.ObjectId;
-import win.doyto.query.entity.Persistable;
+import win.doyto.query.entity.AbstractPersistable;
 
 import java.io.Serializable;
 import javax.persistence.GeneratedValue;
@@ -34,10 +34,7 @@ import javax.persistence.GeneratedValue;
  */
 @Getter
 @Setter
-public abstract class MongoPersistable<I extends Serializable> implements Persistable<I>, ObjectIdAware {
-
-    @GeneratedValue
-    private I id;
+public abstract class MongoPersistable<I extends Serializable> extends AbstractPersistable<I> implements ObjectIdAware {
 
     protected MongoPersistable() {
         ObjectIdMapper.initIdMapper(this.getClass());

@@ -43,9 +43,13 @@ public class UserQuery extends PageQuery {
     @DomainPath(value = "user", localField = "createUserId")
     private UserQuery createUser;
 
+    @DomainPath(value = "user", foreignField = "createUserId")
+    private UserQuery createdUsers;
+
     @DomainPath({"user", "role"})
     private RoleQuery role;
 
     private String username;
+    private Boolean valid;
 
 }

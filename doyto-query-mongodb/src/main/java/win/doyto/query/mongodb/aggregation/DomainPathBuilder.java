@@ -53,17 +53,21 @@ public class DomainPathBuilder {
 
         Document projectDoc = new Document();
         ColumnUtil.filterFields(viewClass).forEach(f -> projectDoc.append(f.getName(), PROJECTING));
+        DomainPathDetail domainPathDetail = DomainPathDetail.buildBy(domainPath, DomainPathBuilder::mapIdField);
 
-        if (paths.length == 1) {
+        if (domainPathDetail.onlyOneDomain()) {
             String tableName = String.format(TABLE_FORMAT, paths[0]);
-            return lookup0(tableName, domainPath.localField(), domainPath.foreignField(), Collections.singletonList(project(projectDoc)), viewName);
+            return lookup0(tableName,
+                           domainPathDetail.getLocalFieldColumn(), domainPathDetail.getForeignFieldColumn(),
+                           Collections.singletonList(project(projectDoc)), viewName);
         }
-        return buildLookupForManyToMany(query, field.getName(), domainPath, projectDoc);
+        return buildLookupForManyToMany(query, viewName, projectDoc, domainPathDetail);
     }
 
     @SuppressWarnings("java:S117")
-    private static Bson buildLookupForManyToMany(DoytoQuery query, String viewName, DomainPath domainPathAnno, Document projectDoc) {
-        DomainPathDetail domainPathDetail = DomainPathDetail.buildBy(domainPathAnno);
+    private static Bson buildLookupForManyToMany(
+            DoytoQuery query, String viewName, Document projectDoc, DomainPathDetail domainPathDetail
+    ) {
         String $viewName = "$" + viewName;
 
         String[] joinIds = domainPathDetail.getJoinIds();
@@ -71,7 +75,8 @@ public class DomainPathBuilder {
         int n = joinIds.length - 1;
 
         List<Bson> pipeline = new LinkedList<>();
-        pipeline.add(lookup0(domainPathDetail.getTargetTable(), joinIds[n], MONGO_ID, Collections.emptyList(), viewName));
+        pipeline.add(lookup0(domainPathDetail.getTargetTable(), joinIds[n],
+                             domainPathDetail.getForeignFieldColumn(), Collections.emptyList(), viewName));
         pipeline.add(unwind($viewName));
         pipeline.add(replaceRoot($viewName));
         Bson filter = MongoFilterBuilder.buildFilter(query);
@@ -88,7 +93,7 @@ public class DomainPathBuilder {
             );
         }
 
-        return lookup0(joints[0], MONGO_ID, joinIds[0], pipeline, viewName);
+        return lookup0(joints[0], domainPathDetail.getLocalFieldColumn(), joinIds[0], pipeline, viewName);
     }
 
     public static Bson lookup0(
@@ -111,23 +116,23 @@ public class DomainPathBuilder {
 
     @SuppressWarnings("java:S117")
     public static Bson buildLookUpForNestedQuery(String viewName, DomainPath domainPathAnno) {
-        String[] paths = domainPathAnno.value();
-        if (paths.length == 1) {
-            String tableName = String.format(TABLE_FORMAT, paths[0]);
-            // one-to-many
-            return lookup0(tableName, domainPathAnno.localField(), MONGO_ID, Collections.emptyList(), viewName);
-        }
-
         String $viewName = "$" + viewName;
 
-        DomainPathDetail domainPathDetail = DomainPathDetail.buildBy(domainPathAnno);
+        DomainPathDetail domainPathDetail = DomainPathDetail.buildBy(domainPathAnno, DomainPathBuilder::mapIdField);
+        if (domainPathDetail.onlyOneDomain()) {
+            // one-to-many/many-to-one/one-to-one
+            return lookup0(domainPathDetail.getTargetTable(), domainPathDetail.getLocalFieldColumn(),
+                           domainPathDetail.getForeignFieldColumn(), Collections.emptyList(), viewName);
+        }
+
         String[] joints = domainPathDetail.getJoinTables();
         String[] joinIds = domainPathDetail.getJoinIds();
         String targetTableName = domainPathDetail.getTargetTable();
         int n = joinIds.length - 1;
 
         List<Bson> pipeline = Arrays.asList(
-                lookup0(targetTableName, joinIds[n], MONGO_ID, Collections.emptyList(), viewName),
+                lookup0(targetTableName, joinIds[n], domainPathDetail.getForeignFieldColumn(),
+                        Collections.emptyList(), viewName),
                 replaceRoot(new Document("$arrayElemAt", Arrays.asList($viewName, 0)))
         );
 
@@ -138,6 +143,6 @@ public class DomainPathBuilder {
             );
         }
 
-        return lookup0(joints[0], MONGO_ID, joinIds[0], pipeline, viewName);
+        return lookup0(joints[0], domainPathDetail.getLocalFieldColumn(), joinIds[0], pipeline, viewName);
     }
 }

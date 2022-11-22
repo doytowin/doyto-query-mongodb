@@ -155,7 +155,6 @@ public class AggregationMetadata<C> {
         List<Bson> pipeline = new ArrayList<>();
 
         List<Field> lookupFields = new ArrayList<>();
-        List<String> unwindFields = new ArrayList<>();
         List<String> unsetFields = new ArrayList<>();
 
         Field[] fields = ColumnUtil.initFields(query.getClass());
@@ -164,13 +163,9 @@ public class AggregationMetadata<C> {
                 Object value = CommonUtil.readFieldGetter(field, query);
                 if (value instanceof DoytoQuery) {
                     String subDomainName = field.getName();
-                    DomainPath domainPath = field.getAnnotation(DomainPath.class);
 
                     lookupFields.add(field);
 
-                    if (domainPath.value().length == 1) {
-                        unwindFields.add(subDomainName);
-                    }
                     unsetFields.add(subDomainName);
                 }
             }
@@ -179,11 +174,6 @@ public class AggregationMetadata<C> {
             String subDomainName = lookupField.getName();
             DomainPath domainPath = lookupField.getAnnotation(DomainPath.class);
             pipeline.add(DomainPathBuilder.buildLookUpForNestedQuery(subDomainName, domainPath));
-        }
-        if (!unwindFields.isEmpty()) {
-            for (String unwindField : unwindFields) {
-                pipeline.add(new Document("$unwind", ex(unwindField)));
-            }
         }
         Bson filter = MongoFilterBuilder.buildFilter(query);
         if (!(filter instanceof EmptyBson)) {

@@ -63,4 +63,17 @@ class NestedQueryTest {
         assertThat(result).isEqualTo(expected);
     }
 
+    @Test
+    void supportNestedQueryForManyToOne() {
+        UserQuery createdUsersQuery = UserQuery.builder().valid(false).build();
+        UserQuery query = UserQuery.builder().createdUsers(createdUsersQuery).build();
+        AggregationMetadata<Object> md = new AggregationMetadata<>(UserView.class, null);
+
+        List<Bson> pipeline = md.buildAggregation(query);
+
+        String result = TestUtil.toJson(pipeline);
+        String expected = readString("/query_user_filter_by_created_users.json");
+        assertThat(result).isEqualTo(expected);
+    }
+
 }

@@ -2,19 +2,19 @@
 {
   "$lookup": {
     "from": "t_user",
-    "localField": "createUserId",
-    "foreignField": "_id",
-    "as": "createUser"
+    "localField": "_id",
+    "foreignField": "createUserId",
+    "as": "createdUsers"
   }
 },
 {
   "$match": {
-    "createUser.username": "f0rb"
+    "createdUsers.valid": false
   }
 },
 {
   "$unset": [
-    "createUser"
+    "createdUsers"
   ]
 },
 {

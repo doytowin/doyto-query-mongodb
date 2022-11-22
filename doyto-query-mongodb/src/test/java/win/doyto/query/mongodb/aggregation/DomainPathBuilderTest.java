@@ -19,22 +19,19 @@ package win.doyto.query.mongodb.aggregation;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonWriterSettings;
 import org.junit.jupiter.api.Test;
-import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.core.PageQuery;
 import win.doyto.query.mongodb.test.menu.MenuView;
 import win.doyto.query.mongodb.test.perm.PermView;
+import win.doyto.query.mongodb.test.role.RoleQuery;
 import win.doyto.query.mongodb.test.role.RoleView;
-import win.doyto.query.mongodb.test.role.RoleViewQuery;
 import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.test.menu.MenuQuery;
 import win.doyto.query.test.perm.PermissionQuery;
-import win.doyto.query.test.role.RoleQuery;
 import win.doyto.query.test.user.UserQuery;
 
 import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static win.doyto.query.mongodb.aggregation.DomainPathBuilder.buildLookUpForNestedQuery;
 import static win.doyto.query.mongodb.aggregation.DomainPathBuilder.buildLookUpForSubDomain;
 import static win.doyto.query.mongodb.test.TestUtil.readString;
 
@@ -114,17 +111,6 @@ class DomainPathBuilderTest {
 
         String actual = bson.toBsonDocument().toJson(settings);
         String expected = readString("/query_users_in_perm.json");
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    void buildLookUpForNestedQueries() throws NoSuchFieldException {
-        Field field = RoleViewQuery.class.getDeclaredField("userViewQuery");
-
-        Bson bson = buildLookUpForNestedQuery("user", field.getAnnotation(DomainPath.class));
-
-        String actual = bson.toBsonDocument().toJson(settings);
-        String expected = readString("/query_roles_filter_by_user.json");
         assertThat(actual).isEqualTo(expected);
     }
 }

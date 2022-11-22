@@ -26,7 +26,8 @@ import win.doyto.query.mongodb.test.aggregate.QuantityByStatusView;
 import win.doyto.query.mongodb.test.aggregate.QuantityHaving;
 import win.doyto.query.mongodb.test.aggregate.QuantityView;
 import win.doyto.query.mongodb.test.inventory.QuantityViewQuery;
-import win.doyto.query.mongodb.test.role.RoleViewQuery;
+import win.doyto.query.mongodb.test.role.RoleQuery;
+import win.doyto.query.mongodb.test.user.UserQuery;
 import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.mongodb.test.user.UserViewQuery;
 
@@ -124,8 +125,8 @@ class MongoDataQueryClientTest extends MongoApplicationTest {
     void queryUserWithCreatedUsersAndCreateUser() {
         UserViewQuery userViewQuery = UserViewQuery
                 .builder()
-                .createdUsersQuery(new UserViewQuery())
-                .createUserQuery(new UserViewQuery())
+                .createdUsersQuery(new UserQuery())
+                .createUserQuery(new UserQuery())
                 .build();
         List<UserView> views = dataQueryClient.query(userViewQuery);
         assertThat(views).hasSize(4)
@@ -147,8 +148,8 @@ class MongoDataQueryClientTest extends MongoApplicationTest {
 
     @Test
     void supportQueryUserWithValidRole() {
-        RoleViewQuery roleViewQuery = RoleViewQuery.builder().valid(true).build();
-        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleViewQuery).build();
+        RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
+        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleQuery).build();
         List<UserView> userEntities = dataQueryClient.query(userViewQuery);
         assertThat(userEntities).extracting("username")
                                 .containsExactly("f0rb", "user3");
@@ -156,8 +157,8 @@ class MongoDataQueryClientTest extends MongoApplicationTest {
 
     @Test
     void supportCountUserWithValidRole() {
-        RoleViewQuery roleViewQuery = RoleViewQuery.builder().valid(true).build();
-        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleViewQuery).build();
+        RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
+        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleQuery).build();
         long count = dataQueryClient.count(userViewQuery);
         assertThat(count).isEqualTo(2);
     }

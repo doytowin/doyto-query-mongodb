@@ -26,7 +26,7 @@ import win.doyto.query.mongodb.test.inventory.InventoryEntity;
 import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 import win.doyto.query.mongodb.test.inventory.InventorySize;
 import win.doyto.query.mongodb.test.inventory.SizeQuery;
-import win.doyto.query.mongodb.test.role.RoleViewQuery;
+import win.doyto.query.mongodb.test.role.RoleQuery;
 import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.mongodb.test.user.UserViewQuery;
 
@@ -339,8 +339,8 @@ class MongoDataAccessTest extends MongoApplicationTest {
     @Test
     void supportNestedQuery() {
         // Query users who are assigned valid role.
-        RoleViewQuery roleViewQuery = RoleViewQuery.builder().valid(true).build();
-        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleViewQuery).build();
+        RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
+        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleQuery).build();
         List<UserView> userEntities = userDataAccess.query(userViewQuery);
         assertThat(userEntities).hasSize(2);
         assertThat(userEntities).extracting("username")

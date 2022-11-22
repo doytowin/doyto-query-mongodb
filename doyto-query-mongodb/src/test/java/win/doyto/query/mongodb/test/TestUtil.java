@@ -17,9 +17,13 @@
 package win.doyto.query.mongodb.test;
 
 import lombok.SneakyThrows;
+import org.bson.conversions.Bson;
+import org.bson.json.JsonWriterSettings;
 import org.springframework.util.StreamUtils;
 
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * TestUtil
@@ -28,10 +32,19 @@ import java.nio.charset.Charset;
  * @since 1.0.0
  */
 public class TestUtil {
+    private static final JsonWriterSettings settings = JsonWriterSettings.builder().indent(true).build();
 
     @SneakyThrows
     public static String readString(String name) {
         return StreamUtils.copyToString(TestUtil.class.getResourceAsStream(name), Charset.defaultCharset());
     }
 
+    public static String toJson(Bson bson) {
+        return bson.toBsonDocument().toJson(settings);
+    }
+
+    public static String toJson(List<Bson> bsonList) {
+        return bsonList.stream().map(TestUtil::toJson)
+                       .collect(Collectors.joining(",\n", "[\n", "\n]"));
+    }
 }

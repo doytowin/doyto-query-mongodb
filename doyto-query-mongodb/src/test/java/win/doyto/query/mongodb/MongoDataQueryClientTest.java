@@ -26,10 +26,10 @@ import win.doyto.query.mongodb.test.aggregate.QuantityByStatusView;
 import win.doyto.query.mongodb.test.aggregate.QuantityHaving;
 import win.doyto.query.mongodb.test.aggregate.QuantityView;
 import win.doyto.query.mongodb.test.inventory.QuantityViewQuery;
-import win.doyto.query.mongodb.test.role.RoleQuery;
 import win.doyto.query.mongodb.test.user.UserQuery;
 import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.mongodb.test.user.UserViewQuery;
+import win.doyto.query.test.role.RoleQuery;
 
 import java.util.List;
 
@@ -125,8 +125,8 @@ class MongoDataQueryClientTest extends MongoApplicationTest {
     void queryUserWithCreatedUsersAndCreateUser() {
         UserViewQuery userViewQuery = UserViewQuery
                 .builder()
-                .createdUsersQuery(new UserQuery())
-                .createUserQuery(new UserQuery())
+                .withCreatedUsers(new UserQuery())
+                .withCreateUser(new UserQuery())
                 .build();
         List<UserView> views = dataQueryClient.query(userViewQuery);
         assertThat(views).hasSize(4)

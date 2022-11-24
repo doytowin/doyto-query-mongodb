@@ -22,11 +22,11 @@ import org.junit.jupiter.api.Test;
 import win.doyto.query.core.PageQuery;
 import win.doyto.query.mongodb.test.menu.MenuView;
 import win.doyto.query.mongodb.test.perm.PermView;
-import win.doyto.query.mongodb.test.role.RoleQuery;
 import win.doyto.query.mongodb.test.role.RoleView;
 import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.test.menu.MenuQuery;
 import win.doyto.query.test.perm.PermissionQuery;
+import win.doyto.query.test.role.RoleQuery;
 import win.doyto.query.test.user.UserQuery;
 
 import java.lang.reflect.Field;

@@ -19,6 +19,7 @@ package win.doyto.query.mongodb.aggregation;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.BsonField;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import win.doyto.query.annotation.DomainPath;
@@ -184,7 +185,8 @@ public class AggregationMetadata<C> {
         }
 
         for (Field field : this.getDomainFields()) {
-            Object domainQuery = CommonUtil.readField(query, field.getName() + "Query");
+            String queryFieldName = buildQueryFieldName(field);
+            Object domainQuery = CommonUtil.readField(query, queryFieldName);
             if (domainQuery instanceof DoytoQuery) {
                 Class<?> relatedViewClass = field.getType();
                 if (Collection.class.isAssignableFrom(field.getType())) {
@@ -210,6 +212,10 @@ public class AggregationMetadata<C> {
             pipeline.add(Aggregates.limit(query.getPageSize()));
         }
         return pipeline;
+    }
+
+    private String buildQueryFieldName(Field joinField) {
+        return "with" + StringUtils.capitalize(joinField.getName());
     }
 
     private <H extends Having> Bson buildHaving(H having) {

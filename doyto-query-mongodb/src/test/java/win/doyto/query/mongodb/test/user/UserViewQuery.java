@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import win.doyto.query.core.RelationalQuery;
-import win.doyto.query.mongodb.test.role.RoleQuery;
+import win.doyto.query.test.role.RoleQuery;
 
 import java.math.BigInteger;
 
@@ -38,9 +38,9 @@ import java.math.BigInteger;
 @NoArgsConstructor
 public class UserViewQuery extends UserQuery implements RelationalQuery<UserView, BigInteger> {
 
-    private RoleQuery rolesQuery;
-    private UserQuery createUserQuery;
-    private UserQuery createdUsersQuery;
+    private RoleQuery withRoles;
+    private UserQuery withCreateUser;
+    private UserQuery withCreatedUsers;
 
     @Override
     public Class<UserView> getDomainClass() {

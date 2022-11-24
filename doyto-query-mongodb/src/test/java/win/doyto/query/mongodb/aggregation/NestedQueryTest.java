@@ -20,9 +20,9 @@ import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Test;
 import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.mongodb.test.TestUtil;
-import win.doyto.query.mongodb.test.role.RoleQuery;
 import win.doyto.query.mongodb.test.user.UserQuery;
 import win.doyto.query.mongodb.test.user.UserView;
+import win.doyto.query.test.role.RoleQuery;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -41,7 +41,7 @@ class NestedQueryTest {
 
     @Test
     void supportNestedQueryForManyToManyWithReverseSign() throws NoSuchFieldException {
-        Field field = RoleQuery.class.getDeclaredField("userQuery");
+        Field field = RoleQuery.class.getDeclaredField("user");
 
         Bson bson = buildLookUpForNestedQuery("user", field.getAnnotation(DomainPath.class));
 

@@ -26,9 +26,9 @@ import win.doyto.query.mongodb.test.inventory.InventoryEntity;
 import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 import win.doyto.query.mongodb.test.inventory.InventorySize;
 import win.doyto.query.mongodb.test.inventory.SizeQuery;
-import win.doyto.query.mongodb.test.role.RoleQuery;
 import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.mongodb.test.user.UserViewQuery;
+import win.doyto.query.test.role.RoleQuery;
 
 import java.math.BigInteger;
 import java.util.List;

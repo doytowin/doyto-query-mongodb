@@ -20,9 +20,9 @@ import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Test;
-import win.doyto.query.mongodb.test.role.RoleQuery;
 import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.mongodb.test.user.UserViewQuery;
+import win.doyto.query.test.role.RoleQuery;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,7 +41,7 @@ class AggregationMetadataTest {
     @Test
     void supportRelatedQueryForManyToMany() {
         RoleQuery rolesQuery = RoleQuery.builder().build();
-        UserViewQuery userViewQuery = UserViewQuery.builder().rolesQuery(rolesQuery).build();
+        UserViewQuery userViewQuery = UserViewQuery.builder().withRoles(rolesQuery).build();
         AggregationMetadata<Object> md = new AggregationMetadata<>(UserView.class, null);
 
         List<Bson> pipeline = md.buildAggregation(userViewQuery);

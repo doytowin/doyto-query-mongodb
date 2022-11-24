@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.test.user;
+package win.doyto.query.mongodb.test.perm;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,12 +23,13 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.core.PageQuery;
+import win.doyto.query.mongodb.test.user.UserQuery;
 import win.doyto.query.test.role.RoleQuery;
 
 /**
- * UserQuery
+ * PermQuery
  *
- * @author f0rb on 2022/11/21
+ * @author f0rb on 2022/11/24
  * @since 1.0.0
  */
 @Getter
@@ -36,20 +37,13 @@ import win.doyto.query.test.role.RoleQuery;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@SuppressWarnings("unused")
-public class UserQuery extends PageQuery {
-    private String id;
+public class PermQuery extends PageQuery {
 
-    @DomainPath(value = "user", localField = "createUserId")
-    private UserQuery createUser;
+    @DomainPath({"perm", "~", "role", "~", "user"})
+    private UserQuery user;
 
-    @DomainPath(value = "user", foreignField = "createUserId")
-    private UserQuery createdUsers;
-
-    @DomainPath({"user", "role"})
+    @DomainPath({"perm", "~", "role"})
     private RoleQuery role;
 
-    private String username;
     private Boolean valid;
-
 }

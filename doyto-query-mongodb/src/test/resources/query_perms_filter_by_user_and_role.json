@@ -1,0 +1,109 @@
+[
+{
+  "$lookup": {
+    "from": "a_role_and_perm",
+    "localField": "_id",
+    "foreignField": "perm_id",
+    "pipeline": [
+      {
+        "$lookup": {
+          "from": "a_user_and_role",
+          "localField": "role_id",
+          "foreignField": "role_id",
+          "pipeline": [
+            {
+              "$lookup": {
+                "from": "t_user",
+                "localField": "user_id",
+                "foreignField": "_id",
+                "as": "user"
+              }
+            },
+            {
+              "$replaceRoot": {
+                "newRoot": {
+                  "$arrayElemAt": [
+                    "$user",
+                    0
+                  ]
+                }
+              }
+            }
+          ],
+          "as": "user"
+        }
+      },
+      {
+        "$replaceRoot": {
+          "newRoot": {
+            "$arrayElemAt": [
+              "$user",
+              0
+            ]
+          }
+        }
+      }
+    ],
+    "as": "user"
+  }
+},
+{
+  "$lookup": {
+    "from": "a_role_and_perm",
+    "localField": "_id",
+    "foreignField": "perm_id",
+    "pipeline": [
+      {
+        "$lookup": {
+          "from": "t_role",
+          "localField": "role_id",
+          "foreignField": "_id",
+          "as": "role"
+        }
+      },
+      {
+        "$replaceRoot": {
+          "newRoot": {
+            "$arrayElemAt": [
+              "$role",
+              0
+            ]
+          }
+        }
+      }
+    ],
+    "as": "role"
+  }
+},
+{
+  "$match": {
+    "$and": [
+      {
+        "user.id": "628b3a27f7a4ba009198a677"
+      },
+      {
+        "role.valid": true
+      }
+    ]
+  }
+},
+{
+  "$unset": [
+    "user",
+    "role"
+  ]
+},
+{
+  "$sort": {
+    "_id": 1
+  }
+},
+{
+  "$project": {
+    "id": "$id",
+    "permName": "$permName",
+    "valid": "$valid",
+    "users": "$users"
+  }
+}
+]

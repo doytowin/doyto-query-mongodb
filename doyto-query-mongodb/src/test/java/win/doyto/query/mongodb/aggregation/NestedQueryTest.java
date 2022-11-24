@@ -20,8 +20,10 @@ import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Test;
 import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.mongodb.test.TestUtil;
+import win.doyto.query.mongodb.test.perm.PermQuery;
 import win.doyto.query.mongodb.test.user.UserQuery;
 import win.doyto.query.mongodb.test.user.UserView;
+import win.doyto.query.test.perm.PermView;
 import win.doyto.query.test.role.RoleQuery;
 
 import java.lang.reflect.Field;
@@ -73,6 +75,20 @@ class NestedQueryTest {
 
         String result = TestUtil.toJson(pipeline);
         String expected = readString("/query_user_filter_by_created_users.json");
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void supportNestedQueryForManyToManyWithDomainQuery() {
+        RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
+        UserQuery byUser = UserQuery.builder().id("628b3a27f7a4ba009198a677").build();
+        PermQuery permissionQuery = PermQuery.builder().user(byUser).role(roleQuery).build();
+        AggregationMetadata<Object> md = new AggregationMetadata<>(PermView.class, null);
+
+        List<Bson> pipeline = md.buildAggregation(permissionQuery);
+
+        String result = TestUtil.toJson(pipeline);
+        String expected = readString("/query_perms_filter_by_user_and_role.json");
         assertThat(result).isEqualTo(expected);
     }
 

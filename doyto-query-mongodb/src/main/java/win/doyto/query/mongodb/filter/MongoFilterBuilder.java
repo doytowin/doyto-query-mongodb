@@ -22,6 +22,7 @@ import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.core.Or;
 import win.doyto.query.core.QuerySuffix;
@@ -98,7 +99,10 @@ public class MongoFilterBuilder {
             if (isValidValue(value, field)) {
                 String newPrefix = prefix + field.getName();
                 if (value instanceof DoytoQuery) {
-                    buildFilter(value, newPrefix, filters);
+                    if (field.isAnnotationPresent(DomainPath.class)) {
+                        buildFilter(value, newPrefix, filters);
+                    }
+                    // ignore related query value and domain query inside a nested query
                 } else if (value instanceof Or) {
                     buildOrFilter(value, filters);
                 } else {

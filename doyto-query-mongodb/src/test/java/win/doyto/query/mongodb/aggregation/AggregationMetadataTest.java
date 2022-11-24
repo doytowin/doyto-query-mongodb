@@ -20,6 +20,7 @@ import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Test;
+import win.doyto.query.mongodb.test.TestUtil;
 import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.mongodb.test.user.UserViewQuery;
 import win.doyto.query.test.role.RoleQuery;
@@ -48,6 +49,24 @@ class AggregationMetadataTest {
 
         List<BsonDocument> result = pipeline.stream().map(Bson::toBsonDocument).collect(Collectors.toList());
         BsonArray expected = BsonArray.parse(readString("/query_user_with_roles.json"));
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void supportRelatedQueryAndNestedQueryForManyToMany() {
+        RoleQuery queryByRole = RoleQuery.builder().valid(false).build();
+        RoleQuery queryWithRole = RoleQuery.builder().valid(true).build();
+        UserViewQuery userViewQuery = UserViewQuery
+                .builder()
+                .role(queryByRole)
+                .withRoles(queryWithRole)
+                .build();
+        AggregationMetadata<Object> md = new AggregationMetadata<>(UserView.class, null);
+
+        List<Bson> pipeline = md.buildAggregation(userViewQuery);
+
+        String result = TestUtil.toJson(pipeline);
+        String expected = readString("/query_user_with_valid_roles_filter_by_invalid_roles.json");
         assertThat(result).isEqualTo(expected);
     }
 }

@@ -114,10 +114,7 @@ public class DomainPathBuilder {
         return "id".equals(field) ? MONGO_ID : field;
     }
 
-    @SuppressWarnings("java:S117")
     public static Bson buildLookUpForNestedQuery(String viewName, DomainPath domainPathAnno) {
-        String $viewName = "$" + viewName;
-
         DomainPathDetail domainPathDetail = DomainPathDetail.buildBy(domainPathAnno, DomainPathBuilder::mapIdField);
         if (domainPathDetail.onlyOneDomain()) {
             // one-to-many/many-to-one/one-to-one
@@ -130,16 +127,17 @@ public class DomainPathBuilder {
         String targetTableName = domainPathDetail.getTargetTable();
         int n = joinIds.length - 1;
 
+        Document replaceRootDoc = new Document("$arrayElemAt", Arrays.asList("$" + viewName, 0));
         List<Bson> pipeline = Arrays.asList(
                 lookup0(targetTableName, joinIds[n], domainPathDetail.getForeignFieldColumn(),
                         Collections.emptyList(), viewName),
-                replaceRoot(new Document("$arrayElemAt", Arrays.asList($viewName, 0)))
+                replaceRoot(replaceRootDoc)
         );
 
         for (int i = n - 1; i > 0; i--) {
             pipeline = Arrays.asList(
                     lookup0(joints[i], joinIds[i], joinIds[i], pipeline, viewName),
-                    replaceRoot(new Document("$arrayElemAt", Arrays.asList($viewName, 0)))
+                    replaceRoot(replaceRootDoc)
             );
         }
 

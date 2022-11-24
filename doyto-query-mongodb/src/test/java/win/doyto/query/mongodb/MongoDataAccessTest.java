@@ -22,6 +22,7 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
+import win.doyto.query.core.PageQuery;
 import win.doyto.query.mongodb.test.inventory.InventoryEntity;
 import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 import win.doyto.query.mongodb.test.inventory.InventorySize;
@@ -167,7 +168,7 @@ class MongoDataAccessTest extends MongoApplicationTest {
 
     @Test
     void createSubDocument(@Autowired MongoClient mongoClient) {
-        MongoDataAccess<InventorySize, ObjectId, SizeQuery> sizeDataAccess
+        MongoDataAccess<InventorySize, ObjectId, PageQuery> sizeDataAccess
                 = new MongoDataAccess<>(mongoClient, InventorySize.class);
         InventoryEntity inventoryEntity = inventoryDataAccess.query(InventoryQuery.builder().build()).get(0);
 

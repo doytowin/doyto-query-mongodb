@@ -58,7 +58,7 @@ public class MongoFilterBuilder {
     static {
         suffixFuncMap = new EnumMap<>(QuerySuffix.class);
         suffixFuncMap.put(Eq, Filters::eq);
-        suffixFuncMap.put(Contain, (s, v) -> regex(s, v.toString()));
+        suffixFuncMap.put(Contain, (s, v) -> regex(s, Pattern.quote(v.toString())));
         suffixFuncMap.put(Start, (s, v) -> regex(s, "^" + Pattern.quote(v.toString())));
         suffixFuncMap.put(End, (s, v) -> regex(s, Pattern.quote(v.toString()) + "$"));
         suffixFuncMap.put(Lt, Filters::lt);

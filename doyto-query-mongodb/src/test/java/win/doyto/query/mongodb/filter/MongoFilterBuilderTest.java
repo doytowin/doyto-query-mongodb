@@ -59,7 +59,7 @@ class MongoFilterBuilderTest {
     @CsvSource({
             "{}, {}",
             "{\"username\": \"test\"}, {\"username\": \"test\"}",
-            "{\"usernameContain\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"admin\", \"options\": \"\"}}}'",
+            "{\"usernameContain\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"\\\\Qadmin\\\\E\", \"options\": \"\"}}}'",
             "{\"usernameStart\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"^\\\\Qadmin\\\\E\", \"options\": \"\"}}}'",
             "{\"usernameEnd\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"\\\\Qadmin\\\\E$\", \"options\": \"\"}}}'",
             "{\"idLt\": 20}, {\"id\": {\"$lt\": 20}}",
@@ -98,13 +98,13 @@ class MongoFilterBuilderTest {
             "{\"condition\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15}}" +
                     "| {\"$or\": [{\"status\": {\"$in\": [\"A\", \"D\"]}}, {\"qty\": {\"$gt\": 15}}]}",
             "{\"condition\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15},\"itemContain\":\"test\"}" +
-                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"test\", \"options\": \"\"}}}, " +
+                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"\\\\Qtest\\\\E\", \"options\": \"\"}}}, " +
                     "{\"$or\": [{\"status\": {\"$in\": [\"A\", \"D\"]}}, {\"qty\": {\"$gt\": 15}}]}]}",
             "{\"condition\":{\"statusIn\":[\"A\",\"D\"]},\"itemContain\":\"test\"}" +
-                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"test\", \"options\": \"\"}}}, " +
+                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"\\\\Qtest\\\\E\", \"options\": \"\"}}}, " +
                     "{\"status\": {\"$in\": [\"A\", \"D\"]}}]}",
             "{\"condition\":{},\"itemContain\":\"test\"}" +
-                    "| {\"item\": {\"$regularExpression\": {\"pattern\": \"test\", \"options\": \"\"}}}",
+                    "| {\"item\": {\"$regularExpression\": {\"pattern\": \"\\\\Qtest\\\\E\", \"options\": \"\"}}}",
     }, delimiter = '|')
     void testOrFilter(String data, String expected) {
         InventoryQuery query = BeanUtil.parse(data, InventoryQuery.class);

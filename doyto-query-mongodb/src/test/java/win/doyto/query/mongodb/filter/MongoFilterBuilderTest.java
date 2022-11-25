@@ -69,6 +69,7 @@ class MongoFilterBuilderTest {
             "{\"userLevel\": \"VIP\"}, {\"userLevel\": 0}",
             "{\"userLevelNot\": \"VIP\"}, {\"userLevel\": {\"$ne\": 0}}",
             "{\"memoNull\": true}, {\"memo\": null}",
+            "{\"memoNotNull\": true}, {\"memo\": {\"$ne\": null}}",
     })
     void testFilterSuffix(String data, String expected) {
         TestQuery query = BeanUtil.parse(data, TestQuery.class);

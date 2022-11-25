@@ -67,6 +67,7 @@ public class MongoFilterBuilder {
         suffixFuncMap.put(NotIn, (fieldName, values) -> Filters.nin(fieldName, (Iterable<?>) values));
         suffixFuncMap.put(Not, Filters::ne);
         suffixFuncMap.put(Null, (name, value) -> Filters.eq(name, BsonNull.VALUE));
+        suffixFuncMap.put(NotNull, (name, value) -> Filters.ne(name, BsonNull.VALUE));
 
         suffixFuncMap.put(Near, MongoGeoFilters::near);
         suffixFuncMap.put(NearSphere, MongoGeoFilters::nearSphere);

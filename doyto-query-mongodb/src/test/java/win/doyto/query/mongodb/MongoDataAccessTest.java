@@ -347,4 +347,16 @@ class MongoDataAccessTest extends MongoApplicationTest {
         assertThat(userEntities).extracting("username")
                                 .containsExactly("f0rb", "user3");
     }
+
+    @Test
+    void queryWithStart() {
+        InventoryQuery query = InventoryQuery.builder().itemStart("p").build();
+
+        //when
+        List<InventoryEntity> entities = inventoryDataAccess.query(query);
+
+        //then
+        assertThat(entities).extracting("item")
+                .containsExactly("paper", "planner", "postcard");
+    }
 }

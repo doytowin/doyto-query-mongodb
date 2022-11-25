@@ -49,7 +49,7 @@ class MongoFilterBuilderTest {
     private CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
             CodecRegistries.fromCodecs(
                     new StringCodec(), new IntegerCodec(), new DateCodec(),
-                    new DocumentCodec(), new BsonDocumentCodec()
+                    new DocumentCodec(), new BsonDocumentCodec(), new BsonNullCodec()
             ),
             CodecRegistries.fromProviders(new IterableCodecProvider(), new GeoJsonCodecProvider())
     );
@@ -68,6 +68,7 @@ class MongoFilterBuilderTest {
             "'{\"idNotIn\": [1,2,3]}', '{\"id\": {\"$nin\": [1, 2, 3]}}'",
             "{\"userLevel\": \"VIP\"}, {\"userLevel\": 0}",
             "{\"userLevelNot\": \"VIP\"}, {\"userLevel\": {\"$ne\": 0}}",
+            "{\"memoNull\": true}, {\"memo\": null}",
     })
     void testFilterSuffix(String data, String expected) {
         TestQuery query = BeanUtil.parse(data, TestQuery.class);

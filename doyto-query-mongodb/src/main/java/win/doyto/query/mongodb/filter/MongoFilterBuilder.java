@@ -20,6 +20,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.BsonNull;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import win.doyto.query.annotation.DomainPath;
@@ -65,6 +66,8 @@ public class MongoFilterBuilder {
         suffixFuncMap.put(In, (fieldName, values) -> Filters.in(fieldName, (Iterable<?>) values));
         suffixFuncMap.put(NotIn, (fieldName, values) -> Filters.nin(fieldName, (Iterable<?>) values));
         suffixFuncMap.put(Not, Filters::ne);
+        suffixFuncMap.put(Null, (name, value) -> Filters.eq(name, BsonNull.VALUE));
+
         suffixFuncMap.put(Near, MongoGeoFilters::near);
         suffixFuncMap.put(NearSphere, MongoGeoFilters::nearSphere);
         suffixFuncMap.put(Center, MongoGeoFilters::withinCenter);

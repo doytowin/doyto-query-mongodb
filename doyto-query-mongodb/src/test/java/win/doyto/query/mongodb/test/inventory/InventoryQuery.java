@@ -37,6 +37,7 @@ public class InventoryQuery extends PageQuery {
 
     private String itemContain;
     private String itemStart;
+    private String itemEnd;
     private String status;
     private SizeQuery size;
     private ConditionOr condition;

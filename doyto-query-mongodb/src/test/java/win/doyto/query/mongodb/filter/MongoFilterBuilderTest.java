@@ -61,6 +61,7 @@ class MongoFilterBuilderTest {
             "{\"username\": \"test\"}, {\"username\": \"test\"}",
             "{\"usernameContain\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"admin\", \"options\": \"\"}}}'",
             "{\"usernameStart\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"^\\\\Qadmin\\\\E\", \"options\": \"\"}}}'",
+            "{\"usernameEnd\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"\\\\Qadmin\\\\E$\", \"options\": \"\"}}}'",
             "{\"idLt\": 20}, {\"id\": {\"$lt\": 20}}",
             "{\"idLe\": 20}, {\"id\": {\"$lte\": 20}}",
             "{\"createTimeLt\": \"2021-11-24\"}, {\"createTime\": {\"$lt\": {\"$date\": \"2021-11-24T00:00:00Z\"}}}",

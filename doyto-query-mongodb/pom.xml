@@ -28,6 +28,7 @@
 
     <artifactId>doyto-query-mongodb</artifactId>
     <name>doyto-query-mongodb</name>
+    <description>DoytoQuery MongoDB implementation</description>
 
     <properties>
         <skipDeploy>false</skipDeploy>
@@ -38,6 +39,12 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>win.doyto</groupId>
+            <artifactId>doyto-query-web</artifactId>
+            <version>${doyto-query.version}</version>
             <optional>true</optional>
         </dependency>
 

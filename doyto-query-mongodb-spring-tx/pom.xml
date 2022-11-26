@@ -28,6 +28,11 @@
 
     <artifactId>doyto-query-mongodb-spring-tx</artifactId>
     <name>doyto-query-mongodb-spring-tx</name>
+    <description>Spring Transaction implementation for MongoDB</description>
+
+    <properties>
+        <skipDeploy>false</skipDeploy>
+    </properties>
 
     <dependencies>
 
@@ -83,7 +88,6 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.33</version>
             <scope>test</scope>
         </dependency>
         <dependency>

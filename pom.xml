@@ -33,11 +33,11 @@
     <url>https://query.doyto.win/</url>
 
     <properties>
-        <revision>1.0.0-M1</revision>
+        <revision>1.0.0-M2</revision>
 
         <spring-boot.version>2.7.5</spring-boot.version>
         <embedded-mongo.version>3.5.2</embedded-mongo.version>
-        <doyto-query.version>1.0.0-M1</doyto-query.version>
+        <doyto-query.version>1.0.0-M2</doyto-query.version>
 
         <sourceDirectory>src/main/java</sourceDirectory>
         <skipDeploy>true</skipDeploy>

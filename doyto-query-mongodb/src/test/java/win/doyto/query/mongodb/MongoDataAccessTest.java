@@ -1,57 +1,61 @@
+/*
+ * Copyright © 2019-2022 Forb Yuan
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package win.doyto.query.mongodb;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
 import org.assertj.core.groups.Tuple;
 import org.bson.types.ObjectId;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.test.context.ActiveProfiles;
+import win.doyto.query.core.PageQuery;
 import win.doyto.query.mongodb.test.inventory.InventoryEntity;
 import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 import win.doyto.query.mongodb.test.inventory.InventorySize;
 import win.doyto.query.mongodb.test.inventory.SizeQuery;
-import win.doyto.query.util.BeanUtil;
+import win.doyto.query.mongodb.test.user.UserView;
+import win.doyto.query.mongodb.test.user.UserViewQuery;
+import win.doyto.query.test.role.RoleQuery;
 
-import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ_WRITE;
 
 /**
  * MongoDataAccessTest
  *
  * @author f0rb on 2021-11-23
  */
-@ActiveProfiles("test")
-@DataMongoTest
-@SpringBootApplication
-class MongoDataAccessTest {
-    MongoDataAccess<InventoryEntity, String, InventoryQuery> mongoDataAccess;
+@ResourceLock(value = "inventory", mode = READ_WRITE)
+class MongoDataAccessTest extends MongoApplicationTest {
+    MongoDataAccess<InventoryEntity, String, InventoryQuery> inventoryDataAccess;
+    MongoDataAccess<UserView, BigInteger, UserViewQuery> userDataAccess;
 
     public MongoDataAccessTest(@Autowired MongoClient mongoClient) {
-        this.mongoDataAccess = new MongoDataAccess<>(mongoClient, InventoryEntity.class);
-    }
-
-    @BeforeEach
-    void setUp() throws IOException {
-        List<InventoryEntity> data = BeanUtil.loadJsonData("test/inventory/inventory.json", new TypeReference<List<InventoryEntity>>() {});
-        mongoDataAccess.batchInsert(data);
-    }
-
-    @AfterEach
-    void tearDown() {
-        mongoDataAccess.getCollection().drop();
+        this.inventoryDataAccess = new MongoDataAccess<>(mongoClient, InventoryEntity.class);
+        this.userDataAccess = new MongoDataAccess<>(mongoClient, UserView.class);
     }
 
     @Test
     void query() {
         InventoryQuery query = InventoryQuery.builder().build();
-        List<InventoryEntity> list = mongoDataAccess.query(query);
+        List<InventoryEntity> list = inventoryDataAccess.query(query);
         assertThat(list)
                   .hasSize(5)
                   .element(1)
@@ -62,17 +66,19 @@ class MongoDataAccessTest {
     @Test
     void get() {
         InventoryQuery query = InventoryQuery.builder().build();
-        List<InventoryEntity> list = mongoDataAccess.query(query);
+        List<InventoryEntity> list = inventoryDataAccess.query(query);
 
         String id = list.get(0).getId();
-        InventoryEntity inventoryEntity = mongoDataAccess.get(id);
-        assertThat(inventoryEntity).isEqualToIgnoringGivenFields(list.get(0), "size");
+        InventoryEntity inventoryEntity = inventoryDataAccess.get(id);
+        assertThat(inventoryEntity)
+                .usingRecursiveComparison()
+                .isEqualTo(list.get(0));
     }
 
     @Test
     void queryByStatus() {
         InventoryQuery query = InventoryQuery.builder().status("A").build();
-        List<InventoryEntity> list = mongoDataAccess.query(query);
+        List<InventoryEntity> list = inventoryDataAccess.query(query);
         assertThat(list)
                   .hasSize(3)
                   .element(1)
@@ -83,7 +89,7 @@ class MongoDataAccessTest {
     @Test
     void queryByStatusAndItemContain() {
         InventoryQuery query = InventoryQuery.builder().itemContain("t").status("A").build();
-        List<InventoryEntity> list = mongoDataAccess.query(query);
+        List<InventoryEntity> list = inventoryDataAccess.query(query);
         assertThat(list)
                   .hasSize(2)
                   .first()
@@ -95,7 +101,7 @@ class MongoDataAccessTest {
     void queryBySizeGt() {
         SizeQuery sizeQuery = SizeQuery.builder().hLt(10).build();
         InventoryQuery query = InventoryQuery.builder().size(sizeQuery).status("A").build();
-        List<InventoryEntity> list = mongoDataAccess.query(query);
+        List<InventoryEntity> list = inventoryDataAccess.query(query);
         assertThat(list)
                   .hasSize(1)
                   .first()
@@ -107,7 +113,7 @@ class MongoDataAccessTest {
     void countBySize$hLt10AndStatusEqA() {
         SizeQuery sizeQuery = SizeQuery.builder().hLt(10).build();
         InventoryQuery query = InventoryQuery.builder().size(sizeQuery).status("A").build();
-        long count = mongoDataAccess.count(query);
+        long count = inventoryDataAccess.count(query);
         assertThat(count).isEqualTo(1);
     }
 
@@ -115,26 +121,26 @@ class MongoDataAccessTest {
     void deleteBySize$hLt10AndStatusEqA() {
         SizeQuery sizeQuery = SizeQuery.builder().hLt(10).build();
         InventoryQuery query = InventoryQuery.builder().size(sizeQuery).status("A").build();
-        long deleted = mongoDataAccess.delete(query);
+        long deleted = inventoryDataAccess.delete(query);
         assertThat(deleted).isEqualTo(1);
 
-        long left = mongoDataAccess.count(new InventoryQuery());
+        long left = inventoryDataAccess.count(new InventoryQuery());
         assertThat(left).isEqualTo(4);
     }
 
     @Test
     void update() {
         InventoryQuery query = InventoryQuery.builder().build();
-        List<InventoryEntity> list = mongoDataAccess.query(query);
+        List<InventoryEntity> list = inventoryDataAccess.query(query);
 
         InventoryEntity first = list.get(0);
         first.setStatus("C");
         first.getSize().setH(100.);
-        int updateCount = mongoDataAccess.update(first);
+        int updateCount = inventoryDataAccess.update(first);
         assertThat(updateCount).isEqualTo(1);
 
         //id remains the same and `status` changes to C and `size.h` changes to 100.
-        InventoryEntity updated = mongoDataAccess.get(first.getId());
+        InventoryEntity updated = inventoryDataAccess.get(first.getId());
         assertThat(updated)
                   .extracting("id", "status", "size.h")
                   .containsExactly(first.getId(), "C", 100.)
@@ -142,7 +148,7 @@ class MongoDataAccessTest {
     }
 
     @Test
-    void create() {
+    void builder() {
         InventoryEntity origin = new InventoryEntity();
         origin.setItem("bookshelf");
         origin.setQty(20);
@@ -152,18 +158,19 @@ class MongoDataAccessTest {
         size.setW(40.);
         size.setUom("in");
         origin.setSize(size);
-        mongoDataAccess.create(origin);
+        inventoryDataAccess.create(origin);
 
-        InventoryEntity fromDB = mongoDataAccess.get(origin.getId());
-        assertThat(fromDB).isEqualToIgnoringGivenFields(fromDB, "size");
-
+        InventoryEntity fromDB = inventoryDataAccess.get(origin.getId());
+        assertThat(fromDB)
+                .usingRecursiveComparison()
+                .isEqualTo(origin);
     }
 
     @Test
     void createSubDocument(@Autowired MongoClient mongoClient) {
-        MongoDataAccess<InventorySize, ObjectId, SizeQuery> sizeDataAccess
+        MongoDataAccess<InventorySize, ObjectId, PageQuery> sizeDataAccess
                 = new MongoDataAccess<>(mongoClient, InventorySize.class);
-        InventoryEntity inventoryEntity = mongoDataAccess.query(InventoryQuery.builder().build()).get(0);
+        InventoryEntity inventoryEntity = inventoryDataAccess.query(InventoryQuery.builder().build()).get(0);
 
         InventorySize size = inventoryEntity.getSize();
         sizeDataAccess.create(size);
@@ -174,9 +181,9 @@ class MongoDataAccessTest {
     @Test
     void paging() {
         // query [2,4)
-        InventoryQuery testQuery = InventoryQuery.builder().pageNumber(1).pageSize(2).build();
-        assertThat(mongoDataAccess.count(testQuery)).isEqualTo(5);
-        assertThat(mongoDataAccess.query(testQuery))
+        InventoryQuery testQuery = InventoryQuery.builder().pageNumber(2).pageSize(2).build();
+        assertThat(inventoryDataAccess.count(testQuery)).isEqualTo(5);
+        assertThat(inventoryDataAccess.query(testQuery))
                 .extracting("item")
                 .containsExactly("paper", "planner")
         ;
@@ -186,20 +193,20 @@ class MongoDataAccessTest {
     void deleteById() {
         SizeQuery sizeQuery = SizeQuery.builder().hLt(10).build();
         InventoryQuery query = InventoryQuery.builder().size(sizeQuery).status("A").build();
-        List<InventoryEntity> list = mongoDataAccess.query(query);
+        List<InventoryEntity> list = inventoryDataAccess.query(query);
 
         //when
-        int deleted = mongoDataAccess.delete(list.get(0).getId());
+        int deleted = inventoryDataAccess.delete(list.get(0).getId());
         assertThat(deleted).isEqualTo(1);
 
-        long left = mongoDataAccess.count(new InventoryQuery());
+        long left = inventoryDataAccess.count(new InventoryQuery());
         assertThat(left).isEqualTo(4);
     }
 
     @Test
     void patch() {
         InventoryQuery query = InventoryQuery.builder().build();
-        InventoryEntity notebook = mongoDataAccess.query(query).get(1);
+        InventoryEntity notebook = inventoryDataAccess.query(query).get(1);
         InventoryEntity patch = new InventoryEntity();
         patch.setId(notebook.getId());
         patch.setStatus("P");
@@ -208,11 +215,11 @@ class MongoDataAccessTest {
         patch.setSize(size);
 
         //when
-        int count = mongoDataAccess.patch(patch);
+        int count = inventoryDataAccess.patch(patch);
 
         //then
         assertThat(count).isEqualTo(1);
-        assertThat(mongoDataAccess.get(notebook.getId()))
+        assertThat(inventoryDataAccess.get(notebook.getId()))
                 .extracting("item", "qty", "status", "size.h", "size.w", "size.uom")
                 .containsExactly("notebook", 50, "P", 20., 11., "in");
     }
@@ -224,7 +231,7 @@ class MongoDataAccessTest {
         patch.setStatus("P");
 
         //when
-        int count = mongoDataAccess.patch(patch, query);
+        int count = inventoryDataAccess.patch(patch, query);
 
         //then
         assertThat(count).isEqualTo(3);
@@ -233,7 +240,7 @@ class MongoDataAccessTest {
     @Test
     void queryColumns() {
         InventoryQuery query = InventoryQuery.builder().build();
-        List<InventoryEntity> entities = mongoDataAccess.queryColumns(query, InventoryEntity.class, "item", "size.h");
+        List<InventoryEntity> entities = inventoryDataAccess.queryColumns(query, InventoryEntity.class, "item", "size.h");
         assertThat(entities)
                   .hasSize(5)
                   .first()
@@ -246,8 +253,8 @@ class MongoDataAccessTest {
         InventoryQuery query = InventoryQuery.builder().status("A").build();
 
         //when
-        List<ObjectId> ids = mongoDataAccess.queryObjectId(query);
-        List<InventoryEntity> entities = mongoDataAccess.query(query);
+        List<ObjectId> ids = inventoryDataAccess.queryObjectId(query);
+        List<InventoryEntity> entities = inventoryDataAccess.query(query);
 
         //then
         assertThat(entities).extracting("objectId").hasSameElementsAs(ids);
@@ -256,14 +263,14 @@ class MongoDataAccessTest {
     @Test
     void queryFirstLevelSingleColumn() {
         InventoryQuery query = InventoryQuery.builder().pageSize(2).build();
-        List<String> items = mongoDataAccess.queryColumns(query, String.class, "item");
+        List<String> items = inventoryDataAccess.queryColumns(query, String.class, "item");
         assertThat(items).containsExactly("journal", "notebook");
     }
 
     @Test
     void queryNestedSingleColumn() {
         InventoryQuery query = InventoryQuery.builder().pageSize(2).build();
-        List<String> items = mongoDataAccess.queryColumns(query, String.class, "size.uom");
+        List<String> items = inventoryDataAccess.queryColumns(query, String.class, "size.uom");
         assertThat(items).containsExactly("cm", "in");
     }
 
@@ -274,7 +281,7 @@ class MongoDataAccessTest {
         InventoryEntity patch = new InventoryEntity();
         patch.setStatus("F");
 
-        int count = mongoDataAccess.patch(patch, query);
+        int count = inventoryDataAccess.patch(patch, query);
         assertThat(count).isEqualTo(2);
     }
 
@@ -283,21 +290,21 @@ class MongoDataAccessTest {
         // only change [2, 4) inventories' status to F
         InventoryQuery query = InventoryQuery.builder().pageNumber(1).pageSize(2).build();
 
-        int count = mongoDataAccess.delete(query);
+        int count = inventoryDataAccess.delete(query);
         assertThat(count).isEqualTo(2);
     }
 
     @Test
     void queryNestedSingleColumnWithTypeDouble() {
         InventoryQuery query = InventoryQuery.builder().pageSize(2).build();
-        List<Double> items = mongoDataAccess.queryColumns(query, Double.class, "size.h");
+        List<Double> items = inventoryDataAccess.queryColumns(query, Double.class, "size.h");
         assertThat(items).containsExactly(14., 8.5);
     }
 
     @Test
     void sort() {
         InventoryQuery query = InventoryQuery.builder().sort("item,desc").build();
-        List<InventoryEntity> inventoryEntities = mongoDataAccess.query(query);
+        List<InventoryEntity> inventoryEntities = inventoryDataAccess.query(query);
         assertThat(inventoryEntities)
                   .extracting("item")
                   .containsExactly("postcard", "planner", "paper", "notebook", "journal");
@@ -306,7 +313,7 @@ class MongoDataAccessTest {
     @Test
     void sortForNestedField() {
         InventoryQuery query = InventoryQuery.builder().sort("size.h;item,desc").build();
-        List<InventoryEntity> inventoryEntities = mongoDataAccess.query(query);
+        List<InventoryEntity> inventoryEntities = inventoryDataAccess.query(query);
         assertThat(inventoryEntities)
                   .extracting("item", "size.h")
                   .containsExactly(
@@ -323,10 +330,45 @@ class MongoDataAccessTest {
         InventoryQuery query = InventoryQuery.builder().status("A").build();
 
         //when
-        List<String> ids = mongoDataAccess.queryIds(query);
-        List<InventoryEntity> entities = mongoDataAccess.query(query);
+        List<String> ids = inventoryDataAccess.queryIds(query);
+        List<InventoryEntity> entities = inventoryDataAccess.query(query);
 
         //then
         assertThat(entities).extracting("id").hasSameElementsAs(ids);
+    }
+
+    @Test
+    void supportNestedQuery() {
+        // Query users who are assigned valid role.
+        RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
+        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleQuery).build();
+        List<UserView> userEntities = userDataAccess.query(userViewQuery);
+        assertThat(userEntities).hasSize(2);
+        assertThat(userEntities).extracting("username")
+                                .containsExactly("f0rb", "user3");
+    }
+
+    @Test
+    void queryWithStart() {
+        InventoryQuery query = InventoryQuery.builder().itemStart("p").build();
+
+        //when
+        List<InventoryEntity> entities = inventoryDataAccess.query(query);
+
+        //then
+        assertThat(entities).extracting("item")
+                .containsExactly("paper", "planner", "postcard");
+    }
+
+    @Test
+    void queryWithEnd() {
+        InventoryQuery query = InventoryQuery.builder().itemEnd("r").build();
+
+        //when
+        List<InventoryEntity> entities = inventoryDataAccess.query(query);
+
+        //then
+        assertThat(entities).extracting("item")
+                .containsExactly("paper", "planner");
     }
 }

@@ -1,0 +1,41 @@
+[
+{
+  "$lookup": {
+    "from": "t_user",
+    "localField": "createUserId",
+    "foreignField": "_id",
+    "as": "createUser"
+  }
+},
+{
+  "$match": {
+    "createUser.username": "f0rb"
+  }
+},
+{
+  "$unset": [
+    "createUser"
+  ]
+},
+{
+  "$sort": {
+    "_id": 1
+  }
+},
+{
+  "$project": {
+    "username": "$username",
+    "email": "$email",
+    "roles": "$roles",
+    "perms": "$perms",
+    "menus": "$menus",
+    "createUser": {
+      "$arrayElemAt": [
+        "$createUser",
+        0
+      ]
+    },
+    "createdUsers": "$createdUsers"
+  }
+}
+]

@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2019-2022 Forb Yuan
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -10,34 +26,29 @@
         <version>2</version>
     </parent>
 
-    <artifactId>doyto-query-parent</artifactId>
-    <name>DoytoQuery</name>
+    <artifactId>doyto-query-mongodb-repo</artifactId>
+    <name>DoytoQueryMongoDBRepository</name>
     <packaging>pom</packaging>
     <version>${revision}</version>
     <url>https://query.doyto.win/</url>
 
     <properties>
-        <revision>0.3.0-SNAPSHOT</revision>
+        <revision>1.0.0-SNAPSHOT</revision>
 
-        <spring-boot.version>2.2.13.RELEASE</spring-boot.version>
-        <spring-framework.version>5.2.12.RELEASE</spring-framework.version>
+        <spring-boot.version>2.7.5</spring-boot.version>
+        <embedded-mongo.version>3.5.2</embedded-mongo.version>
+        <doyto-query.version>1.0.0-SNAPSHOT</doyto-query.version>
 
         <sourceDirectory>src/main/java</sourceDirectory>
-        <skipDeploy>false</skipDeploy>
+        <skipDeploy>true</skipDeploy>
 
         <jacoco.destFile>${user.dir}/target/jacoco.exec</jacoco.destFile>
         <jacoco.dataFile>${user.dir}/target/jacoco.exec</jacoco.dataFile>
     </properties>
 
     <modules>
-        <module>doyto-query-test</module>
-        <module>doyto-query-api</module>
-        <module>doyto-query-core</module>
-        <module>doyto-query-sql</module>
-        <module>doyto-query-web</module>
-        <module>doyto-query-jdbc</module>
         <module>doyto-query-mongodb</module>
-        <module>doyto-query-integration-test</module>
+        <module>doyto-query-mongodb-spring-tx</module>
     </modules>
 
     <dependencies>
@@ -82,28 +93,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-            <dependency>
-                <groupId>win.doyto</groupId>
-                <artifactId>doyto-query-api</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>win.doyto</groupId>
-                <artifactId>doyto-query-core</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>win.doyto</groupId>
-                <artifactId>doyto-query-sql</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>win.doyto</groupId>
-                <artifactId>doyto-query-test</artifactId>
-                <version>${revision}</version>
-                <scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -138,6 +127,7 @@
                     <include>**/*.sql</include>
                     <include>**/*.xml</include>
                     <include>**/*.json</include>
+                    <include>**/*.properties</include>
                 </includes>
             </testResource>
         </testResources>
@@ -159,11 +149,10 @@
                 </configuration>
             </plugin>
 
-            <!-- 更新pom版本号-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>1.2.7</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <flattenMode>bom</flattenMode>

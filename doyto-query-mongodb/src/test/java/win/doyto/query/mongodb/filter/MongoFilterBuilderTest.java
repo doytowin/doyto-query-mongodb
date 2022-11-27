@@ -1,18 +1,42 @@
+/*
+ * Copyright © 2019-2022 Forb Yuan
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package win.doyto.query.mongodb.filter;
 
+import com.mongodb.client.model.geojson.codecs.GeoJsonCodecProvider;
+import org.assertj.core.util.Lists;
 import org.bson.Document;
 import org.bson.codecs.*;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import win.doyto.query.mongodb.entity.BsonDeserializer;
+import win.doyto.query.geo.GeoPolygon;
+import win.doyto.query.geo.Point;
 import win.doyto.query.mongodb.test.geo.GeoQuery;
 import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 import win.doyto.query.test.TestQuery;
 import win.doyto.query.util.BeanUtil;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -25,26 +49,31 @@ class MongoFilterBuilderTest {
     private CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
             CodecRegistries.fromCodecs(
                     new StringCodec(), new IntegerCodec(), new DateCodec(),
-                    new DocumentCodec(), new BsonDocumentCodec()
+                    new DocumentCodec(), new BsonDocumentCodec(), new BsonNullCodec(),
+                    new BsonBooleanCodec()
             ),
-            CodecRegistries.fromProviders(new IterableCodecProvider())
+            CodecRegistries.fromProviders(new IterableCodecProvider(), new GeoJsonCodecProvider())
     );
 
     @ParameterizedTest
     @CsvSource({
             "{}, {}",
             "{\"username\": \"test\"}, {\"username\": \"test\"}",
-            "{\"usernameContain\": \"admin\"}, '{\"username\": {\"$regex\": \"admin\", \"$options\": \"\"}}'",
+            "{\"usernameContain\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"\\\\Qadmin\\\\E\", \"options\": \"\"}}}'",
+            "{\"usernameStart\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"^\\\\Qadmin\\\\E\", \"options\": \"\"}}}'",
+            "{\"usernameEnd\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"\\\\Qadmin\\\\E$\", \"options\": \"\"}}}'",
             "{\"idLt\": 20}, {\"id\": {\"$lt\": 20}}",
             "{\"idLe\": 20}, {\"id\": {\"$lte\": 20}}",
-            "{\"createTimeLt\": \"2021-11-24\"}, {\"createTime\": {\"$lt\": {\"$date\": 1637712000000}}}",
-            "{\"createTimeGt\": \"2021-11-24\"}, {\"createTime\": {\"$gt\": {\"$date\": 1637712000000}}}",
-            "{\"createTimeGe\": \"2021-11-24\"}, {\"createTime\": {\"$gte\": {\"$date\": 1637712000000}}}",
-            "'{\"idIn\": [1,2,3]}', '{\"id\": {\"$in\": [[1, 2, 3]]}}'",
-            "'{\"idNotIn\": [1,2,3]}', '{\"id\": {\"$nin\": [[1, 2, 3]]}}'",
+            "{\"createTimeLt\": \"2021-11-24\"}, {\"createTime\": {\"$lt\": {\"$date\": \"2021-11-24T00:00:00Z\"}}}",
+            "{\"createTimeGt\": \"2021-11-24\"}, {\"createTime\": {\"$gt\": {\"$date\": \"2021-11-24T00:00:00Z\"}}}",
+            "{\"createTimeGe\": \"2021-11-24\"}, {\"createTime\": {\"$gte\": {\"$date\": \"2021-11-24T00:00:00Z\"}}}",
+            "'{\"idIn\": [1,2,3]}', '{\"id\": {\"$in\": [1, 2, 3]}}'",
+            "'{\"idNotIn\": [1,2,3]}', '{\"id\": {\"$nin\": [1, 2, 3]}}'",
             "{\"userLevel\": \"VIP\"}, {\"userLevel\": 0}",
             "{\"userLevelNot\": \"VIP\"}, {\"userLevel\": {\"$ne\": 0}}",
-
+            "{\"memoNull\": true}, {\"memo\": null}",
+            "{\"memoNotNull\": true}, {\"memo\": {\"$ne\": null}}",
+            "{\"statusExists\": true}, {\"status\": {\"$exists\": true}}",
     })
     void testFilterSuffix(String data, String expected) {
         TestQuery query = BeanUtil.parse(data, TestQuery.class);
@@ -56,9 +85,28 @@ class MongoFilterBuilderTest {
     @CsvSource(value = {
             "{\"size\":{\"hLt\":15}} | {\"size.h\": {\"$lt\": 15}}",
             "{\"size\":{\"hLt\":15,\"unit\":{\"name\":\"inch\"}}}" +
-                    "| {\"size.h\": {\"$lt\": 15}, \"size.unit.name\": \"inch\"}",
+                    "| {\"$and\": [{\"size.h\": {\"$lt\": 15}}, {\"size.unit.name\": \"inch\"}]}",
     }, delimiter = '|')
     void testNestedFilter(String data, String expected) {
+        InventoryQuery query = BeanUtil.parse(data, InventoryQuery.class);
+        Bson filters = MongoFilterBuilder.buildFilter(query);
+        assertEquals(expected, filters.toBsonDocument(Document.class, codecRegistry).toJson());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "{\"condition\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15}}" +
+                    "| {\"$or\": [{\"status\": {\"$in\": [\"A\", \"D\"]}}, {\"qty\": {\"$gt\": 15}}]}",
+            "{\"condition\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15},\"itemContain\":\"test\"}" +
+                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"\\\\Qtest\\\\E\", \"options\": \"\"}}}, " +
+                    "{\"$or\": [{\"status\": {\"$in\": [\"A\", \"D\"]}}, {\"qty\": {\"$gt\": 15}}]}]}",
+            "{\"condition\":{\"statusIn\":[\"A\",\"D\"]},\"itemContain\":\"test\"}" +
+                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"\\\\Qtest\\\\E\", \"options\": \"\"}}}, " +
+                    "{\"status\": {\"$in\": [\"A\", \"D\"]}}]}",
+            "{\"condition\":{},\"itemContain\":\"test\"}" +
+                    "| {\"item\": {\"$regularExpression\": {\"pattern\": \"\\\\Qtest\\\\E\", \"options\": \"\"}}}",
+    }, delimiter = '|')
+    void testOrFilter(String data, String expected) {
         InventoryQuery query = BeanUtil.parse(data, InventoryQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
         assertEquals(expected, filters.toBsonDocument(Document.class, codecRegistry).toJson());
@@ -95,11 +143,29 @@ class MongoFilterBuilderTest {
                     "| {\"locBson\": {\"$geoWithin\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}",
             "{\"locPy\": [[1.0, 1.0], [1.0, 2.0], [2.0, 2.0], [2.0, 1.0]]}" +
                     "| {\"loc\": {\"$geoWithin\": {\"$polygon\": [[1.0, 1.0], [1.0, 2.0], [2.0, 2.0], [2.0, 1.0]]}}}",
-            "{\"locWithin\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}" +
-                    "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}}",
+            "{\"locBsonWithin\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}" +
+                    "| {\"locBson\": {\"$geoWithin\": {\"$geometry\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}}",
+            "{\"locBsonIntX\": {\"type\": \"LineString\", \"coordinates\": [[1.0, 1.0], [2.0, 2.5]]}}" +
+                    "| {\"locBson\": {\"$geoIntersects\": {\"$geometry\": {\"type\": \"LineString\", \"coordinates\": [[1.0, 1.0], [2.0, 2.5]]}}}}",
+       
+            "{\"locWithin\": {\"type\": \"Point\", \"coordinates\": [1.0, 2.5]}}}" +
+                    "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"type\": \"Point\", \"coordinates\": [1.0, 2.5]}}}}",
+            "{\"locWithin\": {\"type\": \"Line\", \"coordinates\": [[1.0, 2.5], [3.2, 1.5]]}}}" +
+                    "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"type\": \"LineString\", \"coordinates\": [[1.0, 2.5], [3.2, 1.5]]}}}}",
+            "{\"locWithin\": {\"type\": \"Polygon\", \"coordinates\": [[[0.0, 0.0], [3.0, 6.0], [6.0, 1.0]]]}}}" +
+                    "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"type\": \"Polygon\", \"coordinates\": [[[0.0, 0.0], [3.0, 6.0], [6.0, 1.0], [0.0, 0.0]]]}}}}",
+            "{\"locWithin\": {\"type\": \"MultiPoint\", \"coordinates\": [[1.0, 2.5], [3.2, 1.5]]}}}" +
+                    "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"type\": \"MultiPoint\", \"coordinates\": [[1.0, 2.5], [3.2, 1.5]]}}}}",
+            "{\"locWithin\": {\"type\": \"MultiLine\", \"coordinates\": [[[0.0, 0.0], [3.0, 6.0], [6.0, 1.0]], [[1.0, 2.0], [3.0, 3.0]]]}}}" +
+                    "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"type\": \"MultiLineString\", \"coordinates\": [[[0.0, 0.0], [3.0, 6.0], [6.0, 1.0]], [[1.0, 2.0], [3.0, 3.0]]]}}}}",
+            "{\"locWithin\": {\"type\": \"MultiPolygon\", \"coordinates\": [[[[0.0, 0.0], [3.0, 6.0], [6.0, 1.0], [0.0, 0.0]], [[1.0, 2.0], [3.0, 3.0], [5.0, 2.0]]]]}}}" +
+                    "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"type\": \"MultiPolygon\", \"coordinates\": [[[[0.0, 0.0], [3.0, 6.0], [6.0, 1.0], [0.0, 0.0]], [[1.0, 2.0], [3.0, 3.0], [5.0, 2.0], [1.0, 2.0]]]]}}}}",
+            "{\"locIntX\": {\"type\": \"MultiLine\", \"coordinates\": [[[0.0, 0.0], [3.0, 6.0], [6.0, 1.0]], [[1.0, 2.0], [3.0, 3.0]]]}}}" +
+                    "| {\"loc\": {\"$geoIntersects\": {\"$geometry\": {\"type\": \"MultiLineString\", \"coordinates\": [[[0.0, 0.0], [3.0, 6.0], [6.0, 1.0]], [[1.0, 2.0], [3.0, 3.0]]]}}}}",
+            "{\"locIntX\": {\"type\": \"GeometryCollection\", \"geometries\": [{\"type\": \"MultiPoint\", \"coordinates\": [[-73.9580, 40.8003], [-73.9498, 40.7968], [-73.9737, 40.7648], [-73.9814, 40.7681]]}, {\"type\": \"MultiLineString\", \"coordinates\": [[[-73.96943, 40.78519], [-73.96082, 40.78095]], [[-73.96415, 40.79229], [-73.95544, 40.78854]], [[-73.97162, 40.78205], [-73.96374, 40.77715]], [[-73.97880, 40.77247], [-73.97036, 40.76811]]]}]}}" +
+                    "| {\"loc\": {\"$geoIntersects\": {\"$geometry\": {\"type\": \"GeometryCollection\", \"geometries\": [{\"type\": \"MultiPoint\", \"coordinates\": [[-73.958, 40.8003], [-73.9498, 40.7968], [-73.9737, 40.7648], [-73.9814, 40.7681]]}, {\"type\": \"MultiLineString\", \"coordinates\": [[[-73.96943, 40.78519], [-73.96082, 40.78095]], [[-73.96415, 40.79229], [-73.95544, 40.78854]], [[-73.97162, 40.78205], [-73.96374, 40.77715]], [[-73.9788, 40.77247], [-73.97036, 40.76811]]]}]}}}}",
     }, delimiter = '|')
     void testGeoQuery(String data, String expected) {
-        BeanUtil.register(Bson.class, new BsonDeserializer());
         GeoQuery query = BeanUtil.parse(data, GeoQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
         assertEquals(expected, filters.toBsonDocument(Document.class, codecRegistry).toJson());
@@ -107,11 +173,23 @@ class MongoFilterBuilderTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-             "{\"locPolygon\": [[1.0, 1.0], [1.0, 2.0]]}  | Polygon query should provide at lease 3 points.",
+            "{\"locPolygon\": [[1.0, 1.0], [1.0, 2.0]]}  | Polygon query should provide at lease 3 points.",
     }, delimiter = '|')
     void failureCaseForGeoQuery(String data, String message) {
         GeoQuery query = BeanUtil.parse(data, GeoQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
         assertEquals("{}", filters.toBsonDocument(Document.class, codecRegistry).toJson(), message);
+    }
+
+    @Test
+    void withInGeoPoly() {
+        List<Point> exterior = Lists.newArrayList(new Point(0, 0), new Point(3, 6), new Point(6, 1));
+        GeoPolygon geoPolygon = new GeoPolygon(Arrays.asList(exterior));
+
+        Bson filters = MongoGeoFilters.withIn("loc", geoPolygon);
+
+        String expected = "{\"loc\": {\"$geoWithin\": {\"$geometry\": {\"type\": \"Polygon\", \"coordinates\": " +
+                "[[[0.0, 0.0], [3.0, 6.0], [6.0, 1.0], [0.0, 0.0]]]}}}}";
+        assertThat(filters.toBsonDocument(Document.class, codecRegistry).toJson()).isEqualTo(expected);
     }
 }

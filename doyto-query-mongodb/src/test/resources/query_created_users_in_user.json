@@ -1,0 +1,16 @@
+{
+  "$lookup": {
+    "from": "t_user",
+    "localField": "_id",
+    "foreignField": "createUserId",
+    "pipeline": [
+      {
+        "$project": {
+          "username": 1,
+          "email": 1
+        }
+      }
+    ],
+    "as": "createdUsers"
+  }
+}

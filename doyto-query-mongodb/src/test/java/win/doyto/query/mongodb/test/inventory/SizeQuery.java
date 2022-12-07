@@ -39,5 +39,6 @@ public class SizeQuery implements NestedQuery {
     // @Jacksonized also works
     @JsonProperty("hLt")
     private Integer hLt;
+    private String uom;
     private UnitQuery unit;
 }

@@ -16,28 +16,17 @@
 
 package win.doyto.query.mongodb.test.inventory;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.bson.types.ObjectId;
-import win.doyto.query.mongodb.entity.MongoPersistable;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityType;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import win.doyto.query.web.controller.AbstractEIQController;
 
 /**
- * InventorySize
+ * InventoryController
  *
- * @author f0rb on 2021-11-23
+ * @author f0rb on 2022/12/6
+ * @since 1.0.0
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity(type = EntityType.MONGO_DB, database = "doyto", name = "c_inventory_size")
-public class InventorySize extends MongoPersistable<ObjectId> {
-    private Double h;
-    private Double w;
-    private String uom;
+@RestController
+@RequestMapping("inventory")
+public class InventoryController extends AbstractEIQController<InventoryEntity, String, InventoryQuery> {
 }

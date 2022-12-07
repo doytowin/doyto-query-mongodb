@@ -22,6 +22,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import win.doyto.query.core.DoytoQuery;
@@ -39,6 +40,7 @@ import java.util.List;
 @ActiveProfiles("test")
 @SpringBootTest
 @ExtendWith(TransactionInvocationInterceptor.class)
+@AutoConfigureMockMvc
 abstract class MongoApplicationTest {
 
     private static boolean initialized;

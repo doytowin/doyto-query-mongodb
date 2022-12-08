@@ -16,11 +16,13 @@
 
 package win.doyto.query.core;
 
+import java.io.Serializable;
+
 /**
  * NestedQuery
  *
  * @author f0rb on 2022/11/24
  * @since 1.0.0
  */
-public interface NestedQuery {
+public interface NestedQuery extends Serializable {
 }

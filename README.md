@@ -130,8 +130,13 @@ class InventoryMvcTest {
 
     @BeforeAll
     static void beforeAll(@Autowired MockMvc mockMvc) throws Exception {
-        InputStream is = MongoApplicationTest.class.getResourceAsStream("/inventory.json");
-        String data = StreamUtils.copyToString(is, Charset.defaultCharset());
+        String data = "[" +
+                "  {\"item\": \"journal\", \"qty\": 25, \"size\": {\"h\": 14, \"w\": 21, \"uom\": \"cm\"}, \"status\": \"A\"}," +
+                "  {\"item\": \"notebook\", \"qty\": 50, \"size\": {\"h\": 8.5, \"w\": 11, \"uom\": \"in\"}, \"status\": \"A\"}," +
+                "  {\"item\": \"paper\", \"qty\": 100, \"size\": {\"h\": 8.5, \"w\": 11, \"uom\": \"in\"}, \"status\": \"D\"}," +
+                "  {\"item\": \"planner\", \"qty\": 75, \"size\": {\"h\": 22.85, \"w\": 30, \"uom\": \"cm\"}, \"status\": \"D\"}," +
+                "  {\"item\": \"postcard\", \"qty\": 45, \"size\": {\"h\": 10, \"w\": 15.25, \"uom\": \"cm\"}, \"status\": \"A\"}" +
+                "]";
         mockMvc.perform(post("/inventory/").content(data).contentType(MediaType.APPLICATION_JSON));
     }
 
@@ -139,7 +144,7 @@ class InventoryMvcTest {
     void queryExamples() throws Exception {
         mockMvc.perform(get("/inventory/?itemContain=book"))
                .andExpect(jsonPath("$.data.total").value(1));
-        
+
         mockMvc.perform(get("/inventory/?status=A"))
                .andExpect(jsonPath("$.data.total").value(3));
 

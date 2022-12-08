@@ -19,7 +19,8 @@ package win.doyto.query.mongodb.filter;
 import com.mongodb.client.model.geojson.codecs.GeoJsonCodecProvider;
 import org.assertj.core.util.Lists;
 import org.bson.Document;
-import org.bson.codecs.*;
+import org.bson.codecs.BsonValueCodecProvider;
+import org.bson.codecs.DocumentCodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
@@ -47,13 +48,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MongoFilterBuilderTest {
 
     private CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
-            CodecRegistries.fromCodecs(
-                    new StringCodec(), new IntegerCodec(), new DateCodec(),
-                    new DocumentCodec(), new BsonDocumentCodec(), new BsonNullCodec(),
-                    new BsonBooleanCodec()
-            ),
-            CodecRegistries.fromProviders(new IterableCodecProvider(), new GeoJsonCodecProvider())
-    );
+            CodecRegistries.fromProviders(
+                    new BsonValueCodecProvider(),
+                    new DocumentCodecProvider(),
+                    new GeoJsonCodecProvider()
+            ));
 
     @ParameterizedTest
     @CsvSource({
@@ -78,7 +77,7 @@ class MongoFilterBuilderTest {
     void testFilterSuffix(String data, String expected) {
         TestQuery query = BeanUtil.parse(data, TestQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
-        assertEquals(expected, filters.toBsonDocument(Document.class, codecRegistry).toJson());
+        assertEquals(expected, filters.toBsonDocument().toJson());
     }
 
     @ParameterizedTest
@@ -90,7 +89,7 @@ class MongoFilterBuilderTest {
     void testNestedFilter(String data, String expected) {
         InventoryQuery query = BeanUtil.parse(data, InventoryQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
-        assertEquals(expected, filters.toBsonDocument(Document.class, codecRegistry).toJson());
+        assertEquals(expected, filters.toBsonDocument().toJson());
     }
 
     @ParameterizedTest
@@ -109,7 +108,7 @@ class MongoFilterBuilderTest {
     void testOrFilter(String data, String expected) {
         InventoryQuery query = BeanUtil.parse(data, InventoryQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
-        assertEquals(expected, filters.toBsonDocument(Document.class, codecRegistry).toJson());
+        assertEquals(expected, filters.toBsonDocument().toJson());
     }
 
     @ParameterizedTest
@@ -122,7 +121,7 @@ class MongoFilterBuilderTest {
     }, delimiter = '|')
     void buildSort(String sort, String expected) {
         Bson orderBy = MongoFilterBuilder.buildSort(sort);
-        assertEquals(expected, orderBy.toBsonDocument(Document.class, codecRegistry).toJson());
+        assertEquals(expected, orderBy.toBsonDocument().toJson());
     }
 
     @ParameterizedTest
@@ -178,7 +177,7 @@ class MongoFilterBuilderTest {
     void failureCaseForGeoQuery(String data, String message) {
         GeoQuery query = BeanUtil.parse(data, GeoQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
-        assertEquals("{}", filters.toBsonDocument(Document.class, codecRegistry).toJson(), message);
+        assertEquals("{}", filters.toBsonDocument().toJson(), message);
     }
 
     @Test

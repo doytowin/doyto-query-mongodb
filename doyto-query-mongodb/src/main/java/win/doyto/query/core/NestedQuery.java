@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.test.inventory;
+package win.doyto.query.core;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.NestedQuery;
+import java.io.Serializable;
 
 /**
- * UnitQuery
+ * NestedQuery
  *
- * @author f0rb on 2021-12-04
+ * @author f0rb on 2022/11/24
+ * @since 1.0.0
  */
-@Getter
-@Setter
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UnitQuery implements NestedQuery {
-    private String name;
+public interface NestedQuery extends Serializable {
 }

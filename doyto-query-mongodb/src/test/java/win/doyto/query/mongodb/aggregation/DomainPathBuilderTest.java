@@ -16,8 +16,8 @@
 
 package win.doyto.query.mongodb.aggregation;
 
-import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
+import org.bson.json.JsonWriterSettings;
 import org.junit.jupiter.api.Test;
 import win.doyto.query.core.PageQuery;
 import win.doyto.query.mongodb.test.menu.MenuView;
@@ -42,6 +42,8 @@ import static win.doyto.query.mongodb.test.TestUtil.readString;
  */
 class DomainPathBuilderTest {
 
+    private final JsonWriterSettings settings = JsonWriterSettings.builder().indent(true).build();
+
     @Test
     void buildDocForSubDomainWithOneJointAndQuery() throws NoSuchFieldException {
         Field field = UserView.class.getDeclaredField("roles");
@@ -49,9 +51,9 @@ class DomainPathBuilderTest {
 
         Bson bson = buildLookUpForSubDomain(roleQuery, RoleView.class, field);
 
-        BsonDocument result = bson.toBsonDocument();
-        BsonDocument expected = BsonDocument.parse(readString("/query_roles_in_user.json"));
-        assertThat(result).isEqualTo(expected);
+        String actual = bson.toBsonDocument().toJson(settings);
+        String expected = readString("/query_roles_in_user.json");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -61,9 +63,9 @@ class DomainPathBuilderTest {
 
         Bson bson = buildLookUpForSubDomain(permissionQuery, PermView.class, field);
 
-        BsonDocument result = bson.toBsonDocument();
-        BsonDocument expected = BsonDocument.parse(readString("/query_perms_in_user.json"));
-        assertThat(result).isEqualTo(expected);
+        String actual = bson.toBsonDocument().toJson(settings);
+        String expected = readString("/query_perms_in_user.json");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -73,9 +75,9 @@ class DomainPathBuilderTest {
 
         Bson bson = buildLookUpForSubDomain(menuQuery, MenuView.class, field);
 
-        BsonDocument result = bson.toBsonDocument();
-        BsonDocument expected = BsonDocument.parse(readString("/query_menus_in_user.json"));
-        assertThat(result).isEqualTo(expected);
+        String actual = bson.toBsonDocument().toJson(settings);
+        String expected = readString("/query_menus_in_user.json");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -84,9 +86,9 @@ class DomainPathBuilderTest {
 
         Bson bson = buildLookUpForSubDomain(new PageQuery(), UserView.class, field);
 
-        BsonDocument result = bson.toBsonDocument();
-        BsonDocument expected = BsonDocument.parse(readString("/query_create_user_in_user.json"));
-        assertThat(result).isEqualTo(expected);
+        String actual = bson.toBsonDocument().toJson(settings);
+        String expected = readString("/query_create_user_in_user.json");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -95,9 +97,9 @@ class DomainPathBuilderTest {
 
         Bson bson = buildLookUpForSubDomain(new PageQuery(), UserView.class, field);
 
-        BsonDocument result = bson.toBsonDocument();
-        BsonDocument expected = BsonDocument.parse(readString("/query_created_users_in_user.json"));
-        assertThat(result).isEqualTo(expected);
+        String actual = bson.toBsonDocument().toJson(settings);
+        String expected = readString("/query_created_users_in_user.json");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -107,8 +109,8 @@ class DomainPathBuilderTest {
 
         Bson bson = buildLookUpForSubDomain(userQuery, UserView.class, field);
 
-        BsonDocument result = bson.toBsonDocument();
-        BsonDocument expected = BsonDocument.parse(readString("/query_users_in_perm.json"));
-        assertThat(result).isEqualTo(expected);
+        String actual = bson.toBsonDocument().toJson(settings);
+        String expected = readString("/query_users_in_perm.json");
+        assertThat(actual).isEqualTo(expected);
     }
 }

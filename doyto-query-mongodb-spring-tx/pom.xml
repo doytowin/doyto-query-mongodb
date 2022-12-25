@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>win.doyto</groupId>
-        <artifactId>doyto-query-mongodb-parent</artifactId>
+        <artifactId>doyto-query-mongodb-repo</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -28,6 +28,11 @@
 
     <artifactId>doyto-query-mongodb-spring-tx</artifactId>
     <name>doyto-query-mongodb-spring-tx</name>
+    <description>Spring Transaction implementation for MongoDB</description>
+
+    <properties>
+        <skipDeploy>false</skipDeploy>
+    </properties>
 
     <dependencies>
 
@@ -61,12 +66,13 @@
         <dependency>
             <groupId>win.doyto</groupId>
             <artifactId>doyto-query-test</artifactId>
-            <version>${revision}</version>
+            <version>${doyto-query.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
+            <version>${embedded-mongo.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -75,8 +81,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

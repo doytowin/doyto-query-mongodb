@@ -16,23 +16,17 @@
 
 package win.doyto.query.mongodb.test.inventory;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.NestedQuery;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import win.doyto.query.web.controller.AbstractEIQController;
 
 /**
- * UnitQuery
+ * InventoryController
  *
- * @author f0rb on 2021-12-04
+ * @author f0rb on 2022/12/6
+ * @since 1.0.0
  */
-@Getter
-@Setter
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UnitQuery implements NestedQuery {
-    private String name;
+@RestController
+@RequestMapping("inventory")
+public class InventoryController extends AbstractEIQController<InventoryEntity, String, InventoryQuery> {
 }

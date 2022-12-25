@@ -27,7 +27,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityType;
 
 /**
- * SizeEntity
+ * InventorySize
  *
  * @author f0rb on 2021-11-23
  */
@@ -35,7 +35,7 @@ import javax.persistence.EntityType;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(type = EntityType.MONGO_DB, database = "doyto", name = "c_inventory")
+@Entity(type = EntityType.MONGO_DB, database = "doyto", name = "c_inventory_size")
 public class InventorySize extends MongoPersistable<ObjectId> {
     private Double h;
     private Double w;

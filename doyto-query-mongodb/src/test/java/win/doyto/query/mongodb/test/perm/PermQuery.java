@@ -16,31 +16,34 @@
 
 package win.doyto.query.mongodb.test.perm;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import win.doyto.query.annotation.DomainPath;
-import win.doyto.query.mongodb.entity.MongoPersistable;
-import win.doyto.query.mongodb.test.user.UserView;
-
-import java.math.BigInteger;
-import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.EntityType;
+import win.doyto.query.core.PageQuery;
+import win.doyto.query.mongodb.test.user.UserQuery;
+import win.doyto.query.test.role.RoleQuery;
 
 /**
- * PermView
+ * PermQuery
  *
- * @author f0rb on 2022-05-21
+ * @author f0rb on 2022/11/24
  * @since 1.0.0
  */
 @Getter
 @Setter
-@Entity(type = EntityType.MONGO_DB, database = "doyto", name = "t_perm")
-public class PermView extends MongoPersistable<BigInteger> {
-    private String permName;
-    private Boolean valid;
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PermQuery extends PageQuery {
 
-    // many-to-many
     @DomainPath({"perm", "~", "role", "~", "user"})
-    private List<UserView> users;
+    private UserQuery user;
+
+    @DomainPath({"perm", "~", "role"})
+    private RoleQuery role;
+
+    private Boolean valid;
 }

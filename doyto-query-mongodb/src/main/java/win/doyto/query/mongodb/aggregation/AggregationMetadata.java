@@ -19,6 +19,7 @@ package win.doyto.query.mongodb.aggregation;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.BsonField;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import win.doyto.query.annotation.DomainPath;
@@ -155,7 +156,6 @@ public class AggregationMetadata<C> {
         List<Bson> pipeline = new ArrayList<>();
 
         List<Field> lookupFields = new ArrayList<>();
-        List<String> unwindFields = new ArrayList<>();
         List<String> unsetFields = new ArrayList<>();
 
         Field[] fields = ColumnUtil.initFields(query.getClass());
@@ -164,13 +164,9 @@ public class AggregationMetadata<C> {
                 Object value = CommonUtil.readFieldGetter(field, query);
                 if (value instanceof DoytoQuery) {
                     String subDomainName = field.getName();
-                    DomainPath domainPath = field.getAnnotation(DomainPath.class);
 
                     lookupFields.add(field);
 
-                    if (domainPath.value().length == 1) {
-                        unwindFields.add(subDomainName);
-                    }
                     unsetFields.add(subDomainName);
                 }
             }
@@ -179,11 +175,6 @@ public class AggregationMetadata<C> {
             String subDomainName = lookupField.getName();
             DomainPath domainPath = lookupField.getAnnotation(DomainPath.class);
             pipeline.add(DomainPathBuilder.buildLookUpForNestedQuery(subDomainName, domainPath));
-        }
-        if (!unwindFields.isEmpty()) {
-            for (String unwindField : unwindFields) {
-                pipeline.add(new Document("$unwind", ex(unwindField)));
-            }
         }
         Bson filter = MongoFilterBuilder.buildFilter(query);
         if (!(filter instanceof EmptyBson)) {
@@ -194,7 +185,8 @@ public class AggregationMetadata<C> {
         }
 
         for (Field field : this.getDomainFields()) {
-            Object domainQuery = CommonUtil.readField(query, field.getName() + "Query");
+            String queryFieldName = buildQueryFieldName(field);
+            Object domainQuery = CommonUtil.readField(query, queryFieldName);
             if (domainQuery instanceof DoytoQuery) {
                 Class<?> relatedViewClass = field.getType();
                 if (Collection.class.isAssignableFrom(field.getType())) {
@@ -220,6 +212,10 @@ public class AggregationMetadata<C> {
             pipeline.add(Aggregates.limit(query.getPageSize()));
         }
         return pipeline;
+    }
+
+    private String buildQueryFieldName(Field joinField) {
+        return "with" + StringUtils.capitalize(joinField.getName());
     }
 
     private <H extends Having> Bson buildHaving(H having) {

@@ -30,6 +30,7 @@ import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoProper
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import win.doyto.query.web.WebMvcConfigurerAdapter;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -41,7 +42,7 @@ import java.net.UnknownHostException;
  * @author f0rb on 2022-03-17
  */
 @SpringBootApplication
-public class MongoApplication {
+public class MongoApplication extends WebMvcConfigurerAdapter {
     public static void main(String[] args) {
         SpringApplication.run(MongoApplication.class);
     }

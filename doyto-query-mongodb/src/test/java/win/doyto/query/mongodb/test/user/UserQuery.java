@@ -14,34 +14,42 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.test.role;
+package win.doyto.query.mongodb.test.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.core.PageQuery;
-import win.doyto.query.core.RelationalQuery;
-
-import java.math.BigInteger;
+import win.doyto.query.test.role.RoleQuery;
 
 /**
- * RoleViewQuery
+ * UserQuery
  *
- * @author f0rb on 2022/8/28
+ * @author f0rb on 2022/11/21
  * @since 1.0.0
  */
 @Getter
 @Setter
 @SuperBuilder
-@AllArgsConstructor
 @NoArgsConstructor
-public class RoleViewQuery extends PageQuery implements RelationalQuery<RoleView, BigInteger> {
+@AllArgsConstructor
+@SuppressWarnings("unused")
+public class UserQuery extends PageQuery {
+    private String id;
+
+    @DomainPath(value = "user", localField = "createUserId")
+    private UserQuery createUser;
+
+    @DomainPath(value = "user", foreignField = "createUserId")
+    private UserQuery createdUsers;
+
+    @DomainPath({"user", "role"})
+    private RoleQuery role;
+
+    private String username;
     private Boolean valid;
 
-    @Override
-    public Class<RoleView> getDomainClass() {
-        return RoleView.class;
-    }
 }

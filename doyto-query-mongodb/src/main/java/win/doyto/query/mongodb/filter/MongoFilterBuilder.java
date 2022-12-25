@@ -20,9 +20,12 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.BsonNull;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.core.DoytoQuery;
+import win.doyto.query.core.NestedQuery;
 import win.doyto.query.core.Or;
 import win.doyto.query.core.QuerySuffix;
 import win.doyto.query.entity.Persistable;
@@ -55,7 +58,9 @@ public class MongoFilterBuilder {
     static {
         suffixFuncMap = new EnumMap<>(QuerySuffix.class);
         suffixFuncMap.put(Eq, Filters::eq);
-        suffixFuncMap.put(Contain, (s, v) -> regex(s, v.toString()));
+        suffixFuncMap.put(Contain, (s, v) -> regex(s, Pattern.quote(v.toString())));
+        suffixFuncMap.put(Start, (s, v) -> regex(s, "^" + Pattern.quote(v.toString())));
+        suffixFuncMap.put(End, (s, v) -> regex(s, Pattern.quote(v.toString()) + "$"));
         suffixFuncMap.put(Lt, Filters::lt);
         suffixFuncMap.put(Le, Filters::lte);
         suffixFuncMap.put(Gt, Filters::gt);
@@ -63,6 +68,10 @@ public class MongoFilterBuilder {
         suffixFuncMap.put(In, (fieldName, values) -> Filters.in(fieldName, (Iterable<?>) values));
         suffixFuncMap.put(NotIn, (fieldName, values) -> Filters.nin(fieldName, (Iterable<?>) values));
         suffixFuncMap.put(Not, Filters::ne);
+        suffixFuncMap.put(Null, (name, value) -> Filters.eq(name, BsonNull.VALUE));
+        suffixFuncMap.put(NotNull, (name, value) -> Filters.ne(name, BsonNull.VALUE));
+        suffixFuncMap.put(Exists, (name, value) -> Filters.exists(name, (boolean) value));
+
         suffixFuncMap.put(Near, MongoGeoFilters::near);
         suffixFuncMap.put(NearSphere, MongoGeoFilters::nearSphere);
         suffixFuncMap.put(Center, MongoGeoFilters::withinCenter);
@@ -97,8 +106,13 @@ public class MongoFilterBuilder {
             Object value = CommonUtil.readFieldGetter(field, query);
             if (isValidValue(value, field)) {
                 String newPrefix = prefix + field.getName();
-                if (value instanceof DoytoQuery) {
+                if (value instanceof NestedQuery) {
                     buildFilter(value, newPrefix, filters);
+                } else if (value instanceof DoytoQuery) {
+                    if (field.isAnnotationPresent(DomainPath.class)) {
+                        buildFilter(value, newPrefix, filters);
+                    }
+                    // ignore related query value and domain query inside a nested query
                 } else if (value instanceof Or) {
                     buildOrFilter(value, filters);
                 } else {

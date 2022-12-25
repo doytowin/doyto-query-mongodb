@@ -22,13 +22,14 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
+import win.doyto.query.core.PageQuery;
 import win.doyto.query.mongodb.test.inventory.InventoryEntity;
 import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 import win.doyto.query.mongodb.test.inventory.InventorySize;
 import win.doyto.query.mongodb.test.inventory.SizeQuery;
-import win.doyto.query.mongodb.test.role.RoleViewQuery;
 import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.mongodb.test.user.UserViewQuery;
+import win.doyto.query.test.role.RoleQuery;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -167,7 +168,7 @@ class MongoDataAccessTest extends MongoApplicationTest {
 
     @Test
     void createSubDocument(@Autowired MongoClient mongoClient) {
-        MongoDataAccess<InventorySize, ObjectId, SizeQuery> sizeDataAccess
+        MongoDataAccess<InventorySize, ObjectId, PageQuery> sizeDataAccess
                 = new MongoDataAccess<>(mongoClient, InventorySize.class);
         InventoryEntity inventoryEntity = inventoryDataAccess.query(InventoryQuery.builder().build()).get(0);
 
@@ -339,11 +340,35 @@ class MongoDataAccessTest extends MongoApplicationTest {
     @Test
     void supportNestedQuery() {
         // Query users who are assigned valid role.
-        RoleViewQuery roleViewQuery = RoleViewQuery.builder().valid(true).build();
-        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleViewQuery).build();
+        RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
+        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleQuery).build();
         List<UserView> userEntities = userDataAccess.query(userViewQuery);
         assertThat(userEntities).hasSize(2);
         assertThat(userEntities).extracting("username")
                                 .containsExactly("f0rb", "user3");
+    }
+
+    @Test
+    void queryWithStart() {
+        InventoryQuery query = InventoryQuery.builder().itemStart("p").build();
+
+        //when
+        List<InventoryEntity> entities = inventoryDataAccess.query(query);
+
+        //then
+        assertThat(entities).extracting("item")
+                .containsExactly("paper", "planner", "postcard");
+    }
+
+    @Test
+    void queryWithEnd() {
+        InventoryQuery query = InventoryQuery.builder().itemEnd("r").build();
+
+        //when
+        List<InventoryEntity> entities = inventoryDataAccess.query(query);
+
+        //then
+        assertThat(entities).extracting("item")
+                .containsExactly("paper", "planner");
     }
 }

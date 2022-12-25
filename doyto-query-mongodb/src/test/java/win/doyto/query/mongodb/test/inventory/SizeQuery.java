@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.PageQuery;
+import win.doyto.query.core.NestedQuery;
 
 /**
  * SizeQuery
@@ -34,10 +34,11 @@ import win.doyto.query.core.PageQuery;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SizeQuery extends PageQuery {
+public class SizeQuery implements NestedQuery {
     // https://stackoverflow.com/questions/30205006/why-does-jackson-2-not-recognize-the-first-capital-letter-if-the-leading-camel-c
     // @Jacksonized also works
     @JsonProperty("hLt")
     private Integer hLt;
+    private String uom;
     private UnitQuery unit;
 }

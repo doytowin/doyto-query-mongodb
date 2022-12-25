@@ -19,7 +19,8 @@ package win.doyto.query.mongodb.filter;
 import com.mongodb.client.model.geojson.codecs.GeoJsonCodecProvider;
 import org.assertj.core.util.Lists;
 import org.bson.Document;
-import org.bson.codecs.*;
+import org.bson.codecs.BsonValueCodecProvider;
+import org.bson.codecs.DocumentCodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.conversions.Bson;
@@ -47,18 +48,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MongoFilterBuilderTest {
 
     private CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
-            CodecRegistries.fromCodecs(
-                    new StringCodec(), new IntegerCodec(), new DateCodec(),
-                    new DocumentCodec(), new BsonDocumentCodec()
-            ),
-            CodecRegistries.fromProviders(new IterableCodecProvider(), new GeoJsonCodecProvider())
-    );
+            CodecRegistries.fromProviders(
+                    new BsonValueCodecProvider(),
+                    new DocumentCodecProvider(),
+                    new GeoJsonCodecProvider()
+            ));
 
     @ParameterizedTest
     @CsvSource({
             "{}, {}",
             "{\"username\": \"test\"}, {\"username\": \"test\"}",
-            "{\"usernameContain\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"admin\", \"options\": \"\"}}}'",
+            "{\"usernameContain\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"\\\\Qadmin\\\\E\", \"options\": \"\"}}}'",
+            "{\"usernameStart\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"^\\\\Qadmin\\\\E\", \"options\": \"\"}}}'",
+            "{\"usernameEnd\": \"admin\"}, '{\"username\": {\"$regularExpression\": {\"pattern\": \"\\\\Qadmin\\\\E$\", \"options\": \"\"}}}'",
             "{\"idLt\": 20}, {\"id\": {\"$lt\": 20}}",
             "{\"idLe\": 20}, {\"id\": {\"$lte\": 20}}",
             "{\"createTimeLt\": \"2021-11-24\"}, {\"createTime\": {\"$lt\": {\"$date\": \"2021-11-24T00:00:00Z\"}}}",
@@ -68,11 +70,14 @@ class MongoFilterBuilderTest {
             "'{\"idNotIn\": [1,2,3]}', '{\"id\": {\"$nin\": [1, 2, 3]}}'",
             "{\"userLevel\": \"VIP\"}, {\"userLevel\": 0}",
             "{\"userLevelNot\": \"VIP\"}, {\"userLevel\": {\"$ne\": 0}}",
+            "{\"memoNull\": true}, {\"memo\": null}",
+            "{\"memoNotNull\": true}, {\"memo\": {\"$ne\": null}}",
+            "{\"statusExists\": true}, {\"status\": {\"$exists\": true}}",
     })
     void testFilterSuffix(String data, String expected) {
         TestQuery query = BeanUtil.parse(data, TestQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
-        assertEquals(expected, filters.toBsonDocument(Document.class, codecRegistry).toJson());
+        assertEquals(expected, filters.toBsonDocument().toJson());
     }
 
     @ParameterizedTest
@@ -84,7 +89,7 @@ class MongoFilterBuilderTest {
     void testNestedFilter(String data, String expected) {
         InventoryQuery query = BeanUtil.parse(data, InventoryQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
-        assertEquals(expected, filters.toBsonDocument(Document.class, codecRegistry).toJson());
+        assertEquals(expected, filters.toBsonDocument().toJson());
     }
 
     @ParameterizedTest
@@ -92,18 +97,18 @@ class MongoFilterBuilderTest {
             "{\"condition\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15}}" +
                     "| {\"$or\": [{\"status\": {\"$in\": [\"A\", \"D\"]}}, {\"qty\": {\"$gt\": 15}}]}",
             "{\"condition\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15},\"itemContain\":\"test\"}" +
-                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"test\", \"options\": \"\"}}}, " +
+                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"\\\\Qtest\\\\E\", \"options\": \"\"}}}, " +
                     "{\"$or\": [{\"status\": {\"$in\": [\"A\", \"D\"]}}, {\"qty\": {\"$gt\": 15}}]}]}",
             "{\"condition\":{\"statusIn\":[\"A\",\"D\"]},\"itemContain\":\"test\"}" +
-                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"test\", \"options\": \"\"}}}, " +
+                    "| {\"$and\": [{\"item\": {\"$regularExpression\": {\"pattern\": \"\\\\Qtest\\\\E\", \"options\": \"\"}}}, " +
                     "{\"status\": {\"$in\": [\"A\", \"D\"]}}]}",
             "{\"condition\":{},\"itemContain\":\"test\"}" +
-                    "| {\"item\": {\"$regularExpression\": {\"pattern\": \"test\", \"options\": \"\"}}}",
+                    "| {\"item\": {\"$regularExpression\": {\"pattern\": \"\\\\Qtest\\\\E\", \"options\": \"\"}}}",
     }, delimiter = '|')
     void testOrFilter(String data, String expected) {
         InventoryQuery query = BeanUtil.parse(data, InventoryQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
-        assertEquals(expected, filters.toBsonDocument(Document.class, codecRegistry).toJson());
+        assertEquals(expected, filters.toBsonDocument().toJson());
     }
 
     @ParameterizedTest
@@ -116,7 +121,7 @@ class MongoFilterBuilderTest {
     }, delimiter = '|')
     void buildSort(String sort, String expected) {
         Bson orderBy = MongoFilterBuilder.buildSort(sort);
-        assertEquals(expected, orderBy.toBsonDocument(Document.class, codecRegistry).toJson());
+        assertEquals(expected, orderBy.toBsonDocument().toJson());
     }
 
     @ParameterizedTest
@@ -172,7 +177,7 @@ class MongoFilterBuilderTest {
     void failureCaseForGeoQuery(String data, String message) {
         GeoQuery query = BeanUtil.parse(data, GeoQuery.class);
         Bson filters = MongoFilterBuilder.buildFilter(query);
-        assertEquals("{}", filters.toBsonDocument(Document.class, codecRegistry).toJson(), message);
+        assertEquals("{}", filters.toBsonDocument().toJson(), message);
     }
 
     @Test

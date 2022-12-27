@@ -16,12 +16,13 @@
 
 package win.doyto.query.mongodb.test.inventory;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.PageQuery;
+import win.doyto.query.core.NestedQuery;
 
 /**
  * SizeQuery
@@ -33,7 +34,8 @@ import win.doyto.query.core.PageQuery;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SizeQuery extends PageQuery {
+public class SizeQuery implements NestedQuery {
+    @JsonProperty("hLt")
     private Integer hLt;
     private UnitQuery unit;
 }

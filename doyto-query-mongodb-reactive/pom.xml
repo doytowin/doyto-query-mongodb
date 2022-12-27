@@ -20,13 +20,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>win.doyto</groupId>
-        <artifactId>doyto-query-mongodb-parent</artifactId>
+        <artifactId>doyto-query-mongodb-repo</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>doyto-query-mongodb-reactive</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 
     <properties>
         <doyto-query-reactive.version>1.0.0-SNAPSHOT</doyto-query-reactive.version>
@@ -40,7 +41,7 @@
         <dependency>
             <groupId>win.doyto</groupId>
             <artifactId>doyto-query-reactive-api</artifactId>
-            <version>${revision}</version>
+            <version>${doyto-query-reactive.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
@@ -68,11 +69,12 @@
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
+            <version>${embedded-mongo.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

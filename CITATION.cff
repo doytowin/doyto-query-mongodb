@@ -1,0 +1,32 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: DoytoQueryMongoDB
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Zhen
+    family-names: Yuan
+    email: yuanzhen@doyto.win
+    orcid: 'https://orcid.org/0000-0002-2577-7102'
+    affiliation: 'DOYToWin, Inc.'
+identifiers:
+  - type: url
+    value: >-
+      https://github.com/doytowin/doyto-query-mongodb/releases/tag/v1.0.0
+repository-code: 'https://github.com/doytowin/doyto-query-mongodb'
+url: 'https://www.doyto.win/'
+repository-artifact: >-
+  https://central.sonatype.com/artifact/win.doyto/doyto-query-mongodb/
+abstract: A Java OSM framework for MongoDB.
+keywords:
+  - DoytoQuery
+  - MongoDB
+  - Java
+license: Apache-2.0
+commit: 0ec8f130ca75551e4020ff2869322dffd0ba88a5
+version: 1.0.0
+date-released: '2022-11-28'

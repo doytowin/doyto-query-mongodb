@@ -93,7 +93,7 @@
         <dependency>
             <groupId>win.doyto</groupId>
             <artifactId>doyto-query-mongodb</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

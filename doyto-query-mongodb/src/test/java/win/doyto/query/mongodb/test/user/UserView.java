@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2022 Forb Yuan
+ * Copyright © 2019-2023 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import win.doyto.query.mongodb.test.menu.MenuView;
 import win.doyto.query.mongodb.test.perm.PermView;
 import win.doyto.query.mongodb.test.role.RoleView;
 
-import java.math.BigInteger;
-import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.EntityType;
+import java.math.BigInteger;
+import java.util.List;
 
 /**
  * UserView

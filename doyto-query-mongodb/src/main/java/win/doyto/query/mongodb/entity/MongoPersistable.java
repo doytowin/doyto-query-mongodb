@@ -19,6 +19,7 @@ package win.doyto.query.mongodb.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.types.ObjectId;
@@ -34,6 +35,7 @@ import javax.persistence.GeneratedValue;
  */
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true)
 public abstract class MongoPersistable<I extends Serializable> extends AbstractPersistable<I> implements ObjectIdAware {
 
     protected MongoPersistable() {

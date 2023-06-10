@@ -44,9 +44,6 @@
 
         <jacoco.destFile>${user.dir}/target/jacoco.exec</jacoco.destFile>
         <jacoco.dataFile>${user.dir}/target/jacoco.exec</jacoco.dataFile>
-
-        <sonar.projectKey>doyto-query-mongodb</sonar.projectKey>
-        <sonar.projectName>win.doyto:doyto-query-mongodb</sonar.projectName>
     </properties>
 
     <modules>

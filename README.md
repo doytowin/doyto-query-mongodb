@@ -163,10 +163,10 @@ class InventoryMvcTest {
 
 ## Versions
 
-| Module                        | Snapshot                                                                                                                                     | Release                                                                                                        |
-|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| doyto-query-mongodb           | [![mongodb-snapshots-img]](https://oss.sonatype.org/content/repositories/snapshots/win/doyto/doyto-query-mongodb/)                           | [![mongodb-release-img]](https://search.maven.org/artifact/win.doyto/doyto-query-mongodb/)                     |
-| doyto-query-mongodb-spring-tx | [![mongodb-spring-tx-snapshots-img]](https://oss.sonatype.org/content/repositories/snapshots/win/doyto/doyto-query-mongodb-spring-txcommon/) | [![mongodb-spring-tx-release-img]](https://search.maven.org/artifact/win.doyto/doyto-query-mongodb-spring-tx/) |
+| Module                        | Snapshot                                                                                                                               | Release                                                                                                        |
+|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| doyto-query-mongodb           | [![mongodb-snapshots-img]](https://oss.sonatype.org/content/repositories/snapshots/win/doyto/doyto-query-mongodb/)                     | [![mongodb-release-img]](https://search.maven.org/artifact/win.doyto/doyto-query-mongodb/)                     |
+| doyto-query-mongodb-spring-tx | [![mongodb-spring-tx-snapshots-img]](https://oss.sonatype.org/content/repositories/snapshots/win/doyto/doyto-query-mongodb-spring-tx/) | [![mongodb-spring-tx-release-img]](https://search.maven.org/artifact/win.doyto/doyto-query-mongodb-spring-tx/) |
 
 
 License

@@ -20,7 +20,9 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.BsonDocument;
 import org.bson.BsonNull;
+import org.bson.BsonString;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import win.doyto.query.annotation.DomainPath;
@@ -59,6 +61,7 @@ public class MongoFilterBuilder {
         suffixFuncMap = new EnumMap<>(QuerySuffix.class);
         suffixFuncMap.put(Eq, Filters::eq);
         suffixFuncMap.put(Contain, (s, v) -> regex(s, Pattern.quote(v.toString())));
+        suffixFuncMap.put(NotContain, (s, v) -> not(regexp(s, v.toString())));
         suffixFuncMap.put(Start, (s, v) -> regex(s, "^" + Pattern.quote(v.toString())));
         suffixFuncMap.put(End, (s, v) -> regex(s, Pattern.quote(v.toString()) + "$"));
         suffixFuncMap.put(Lt, Filters::lt);
@@ -80,6 +83,12 @@ public class MongoFilterBuilder {
         suffixFuncMap.put(Py, MongoGeoFilters::withinPolygon);
         suffixFuncMap.put(Within, MongoGeoFilters::withIn);
         suffixFuncMap.put(IntX, MongoGeoFilters::intersects);
+    }
+
+    private static Bson regexp(String fieldName, String pattern) {
+        BsonDocument filter = new BsonDocument();
+        filter.append(fieldName, new BsonDocument("$regex", new BsonString(pattern)));
+        return filter;
     }
 
     public static Bson buildFilter(Object query) {

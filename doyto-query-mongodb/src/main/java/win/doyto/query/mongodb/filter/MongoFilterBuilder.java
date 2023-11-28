@@ -63,6 +63,7 @@ public class MongoFilterBuilder {
         suffixFuncMap.put(Contain, (s, v) -> regex(s, Pattern.quote(v.toString())));
         suffixFuncMap.put(NotContain, (s, v) -> not(regexp(s, v.toString())));
         suffixFuncMap.put(Start, (s, v) -> regex(s, "^" + Pattern.quote(v.toString())));
+        suffixFuncMap.put(NotStart, (s, v) -> not(regexp(s, "^" + v.toString())));
         suffixFuncMap.put(End, (s, v) -> regex(s, Pattern.quote(v.toString()) + "$"));
         suffixFuncMap.put(Lt, Filters::lt);
         suffixFuncMap.put(Le, Filters::lte);

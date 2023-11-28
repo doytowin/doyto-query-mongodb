@@ -60,11 +60,11 @@ public class MongoFilterBuilder {
     static {
         suffixFuncMap = new EnumMap<>(QuerySuffix.class);
         suffixFuncMap.put(Eq, Filters::eq);
-        suffixFuncMap.put(Contain, (s, v) -> regex(s, Pattern.quote(v.toString())));
+        suffixFuncMap.put(Contain, (s, v) -> regexp(s, v.toString()));
         suffixFuncMap.put(NotContain, (s, v) -> not(regexp(s, v.toString())));
-        suffixFuncMap.put(Start, (s, v) -> regex(s, "^" + Pattern.quote(v.toString())));
+        suffixFuncMap.put(Start, (s, v) -> regexp(s, "^" + v.toString()));
         suffixFuncMap.put(NotStart, (s, v) -> not(regexp(s, "^" + v.toString())));
-        suffixFuncMap.put(End, (s, v) -> regex(s, Pattern.quote(v.toString()) + "$"));
+        suffixFuncMap.put(End, (s, v) -> regexp(s, v.toString() + "$"));
         suffixFuncMap.put(NotEnd, (s, v) -> not(regexp(s, v.toString() + "$")));
         suffixFuncMap.put(Lt, Filters::lt);
         suffixFuncMap.put(Le, Filters::lte);
@@ -88,9 +88,7 @@ public class MongoFilterBuilder {
     }
 
     private static Bson regexp(String fieldName, String pattern) {
-        BsonDocument filter = new BsonDocument();
-        filter.append(fieldName, new BsonDocument("$regex", new BsonString(pattern)));
-        return filter;
+        return new BsonDocument(fieldName, new BsonDocument("$regex", new BsonString(pattern)));
     }
 
     public static Bson buildFilter(Object query) {

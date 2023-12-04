@@ -141,14 +141,14 @@ class MongoFilterBuilderTest {
                     "| {\"loc\": {\"$geoWithin\": {\"$centerSphere\": [[1.0, 1.0], 5.0]}}}",
             "{\"locBox\": {\"p1\": {\"x\": 1.0, \"y\": 2.0}, \"p2\": {\"x\": 2.0, \"y\": 1.0}}}" +
                     "| {\"loc\": {\"$geoWithin\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}",
-            "{\"locBsonBox\": {\"$geoWithin\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}" +
-                    "| {\"locBson\": {\"$geoWithin\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}",
+            "{\"locBsonBox\": {\"loc\": {\"$geoWithin\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}}" +
+                    "| {\"loc\": {\"$geoWithin\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}",
             "{\"locPy\": [[1.0, 1.0], [1.0, 2.0], [2.0, 2.0], [2.0, 1.0]]}" +
                     "| {\"loc\": {\"$geoWithin\": {\"$polygon\": [[1.0, 1.0], [1.0, 2.0], [2.0, 2.0], [2.0, 1.0]]}}}",
-            "{\"locBsonWithin\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}" +
-                    "| {\"locBson\": {\"$geoWithin\": {\"$geometry\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}}",
-            "{\"locBsonIntX\": {\"type\": \"LineString\", \"coordinates\": [[1.0, 1.0], [2.0, 2.5]]}}" +
-                    "| {\"locBson\": {\"$geoIntersects\": {\"$geometry\": {\"type\": \"LineString\", \"coordinates\": [[1.0, 1.0], [2.0, 2.5]]}}}}",
+            "{\"locBsonWithin\":  {\"loc\": {\"$geoWithin\": {\"$geometry\":{\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}}}}}" +
+                    "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}}",
+            "{\"locBsonIntX\":  {\"loc\": {\"$geoIntersects\": {\"$geometry\":{\"type\": \"LineString\", \"coordinates\": [[1.0, 1.0], [2.0, 2.5]]}}}}}" +
+                    "| {\"loc\": {\"$geoIntersects\": {\"$geometry\": {\"type\": \"LineString\", \"coordinates\": [[1.0, 1.0], [2.0, 2.5]]}}}}",
        
             "{\"locWithin\": {\"type\": \"Point\", \"coordinates\": [1.0, 2.5]}}}" +
                     "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"type\": \"Point\", \"coordinates\": [1.0, 2.5]}}}}",

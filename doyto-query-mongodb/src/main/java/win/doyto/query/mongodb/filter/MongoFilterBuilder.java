@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonDocument;
 import org.bson.BsonNull;
 import org.bson.BsonString;
-import org.bson.Document;
 import org.bson.conversions.Bson;
 import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.core.DoytoQuery;
@@ -113,7 +112,10 @@ public class MongoFilterBuilder {
         Field[] fields = ColumnUtil.initFields(query.getClass());
         for (Field field : fields) {
             Object value = CommonUtil.readFieldGetter(field, query);
-            if (isValidValue(value, field)) {
+            if (value instanceof Bson) {
+                // process Bson value directly
+                filters.add((Bson) value);
+            } else if (isValidValue(value, field)) {
                 String newPrefix = prefix + field.getName();
                 if (value instanceof NestedQuery) {
                     buildFilter(value, newPrefix, filters);
@@ -127,11 +129,6 @@ public class MongoFilterBuilder {
                 } else {
                     filters.add(resolveFilter(newPrefix, value));
                 }
-            } else if (value instanceof Bson) {
-                // process Bson value directly
-                String fieldName = field.getName();
-                String column = resolve(fieldName).resolveColumnName(fieldName);
-                filters.add(new Document(column, value));
             }
         }
     }

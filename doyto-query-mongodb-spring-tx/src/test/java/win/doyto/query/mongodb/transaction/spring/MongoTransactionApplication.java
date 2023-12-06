@@ -79,13 +79,13 @@ public class MongoTransactionApplication {
         return new MongoTransactionManager(mongoClient, txOptions) {
             @Override
             protected ClientSession getClientSession() {
-                return mongoSessionSupplier.get();
+                return mongoSessionSupplier.get(true);
             }
 
             @Override
             protected void doCleanupAfterCompletion(Object transaction) {
                 super.doCleanupAfterCompletion(transaction);
-                mongoSessionSupplier.close();
+                mongoSessionSupplier.release();
             }
         };
     }

@@ -21,6 +21,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import win.doyto.query.mongodb.MongoAssociationService;
+import win.doyto.query.mongodb.session.MongoSessionSupplier;
 
 import java.util.List;
 
@@ -35,8 +36,11 @@ public class TransactionEnabledService {
 
     private final MongoAssociationService associationService;
 
-    public TransactionEnabledService(@Autowired MongoClient mongoClient) {
-        associationService = new MongoAssociationService(mongoClient, "doyto", "role", "perm");
+    public TransactionEnabledService(
+            @Autowired MongoClient mongoClient,
+            @Autowired MongoSessionSupplier mongoSessionSupplier
+    ) {
+        associationService = new MongoAssociationService(mongoClient, mongoSessionSupplier,"doyto", "role", "perm");
     }
 
     public void reassociateForRole(ObjectId k1, List<ObjectId> k2List) throws Exception {

@@ -16,6 +16,7 @@
 
 package win.doyto.query.mongodb;
 
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import org.apache.commons.lang3.ObjectUtils;
@@ -27,13 +28,13 @@ import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.entity.Persistable;
 import win.doyto.query.mongodb.aggregation.AggregationMetadata;
 import win.doyto.query.mongodb.aggregation.CollectionProvider;
-import win.doyto.query.mongodb.session.MongoSessionSupplier;
 import win.doyto.query.mongodb.session.MongoSessionThreadLocalSupplier;
 import win.doyto.query.util.BeanUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static win.doyto.query.mongodb.MongoConstant.COUNT_KEY;
 
@@ -43,16 +44,16 @@ import static win.doyto.query.mongodb.MongoConstant.COUNT_KEY;
  * @author f0rb on 2022-01-25
  */
 public class MongoDataQueryClient implements DataQueryClient {
-    private final MongoSessionSupplier mongoSessionSupplier;
+    private final Supplier<ClientSession> mongoSessionSupplier;
     private final CollectionProvider collectionProvider;
 
-    public MongoDataQueryClient(MongoClient mongoClient) {
-        this(MongoSessionThreadLocalSupplier.create(mongoClient));
+    MongoDataQueryClient(MongoClient mongoClient) {
+        this(mongoClient, MongoSessionThreadLocalSupplier.create(mongoClient));
     }
 
-    public MongoDataQueryClient(MongoSessionSupplier mongoSessionSupplier) {
+    public MongoDataQueryClient(MongoClient mongoClient, Supplier<ClientSession> mongoSessionSupplier) {
         this.mongoSessionSupplier = mongoSessionSupplier;
-        this.collectionProvider = new CollectionProvider(mongoSessionSupplier.getMongoClient());
+        this.collectionProvider = new CollectionProvider(mongoClient);
     }
 
     @Override

@@ -19,7 +19,6 @@ package win.doyto.query.mongodb.session;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 
-import java.io.Closeable;
 import java.util.function.Supplier;
 
 /**
@@ -27,11 +26,15 @@ import java.util.function.Supplier;
  *
  * @author f0rb on 2022-07-11
  */
-public interface MongoSessionSupplier extends Supplier<ClientSession>, Closeable {
+public interface MongoSessionSupplier extends Supplier<ClientSession> {
 
-    MongoClient getMongoClient();
+    MongoClient getClient();
 
-    ClientSession get();
+    default ClientSession get() {
+        return get(false);
+    }
 
-    void close();
+    ClientSession get(boolean hold);
+
+    void release();
 }

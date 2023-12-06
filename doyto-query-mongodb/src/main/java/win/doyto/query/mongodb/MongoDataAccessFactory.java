@@ -25,8 +25,8 @@ import win.doyto.query.entity.Persistable;
 import win.doyto.query.mongodb.session.MongoSessionSupplier;
 import win.doyto.query.service.DataAccessFactory;
 
-import java.io.Serializable;
 import javax.persistence.EntityType;
+import java.io.Serializable;
 
 /**
  * MongoDataAccessFactory
@@ -46,8 +46,9 @@ public class MongoDataAccessFactory implements DataAccessFactory {
     createDataAccess(BeanFactory beanFactory, Class<E> entityClass) {
         tryCreateEmbeddedMongoServerFirst(beanFactory);
         try {
+            MongoClient mongoClient = beanFactory.getBean(MongoClient.class);
             MongoSessionSupplier mongoSessionSupplier = beanFactory.getBean(MongoSessionSupplier.class);
-            return new MongoDataAccess<>(entityClass, mongoSessionSupplier);
+            return new MongoDataAccess<>(entityClass, mongoClient, mongoSessionSupplier);
         } catch (BeansException e) {
             MongoClient mongoClient = beanFactory.getBean(MongoClient.class);
             return new MongoDataAccess<>(mongoClient, entityClass);

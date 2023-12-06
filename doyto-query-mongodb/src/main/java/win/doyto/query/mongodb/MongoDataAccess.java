@@ -17,6 +17,7 @@
 package win.doyto.query.mongodb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -37,7 +38,6 @@ import win.doyto.query.mongodb.aggregation.CollectionProvider;
 import win.doyto.query.mongodb.entity.ObjectIdAware;
 import win.doyto.query.mongodb.entity.ObjectIdMapper;
 import win.doyto.query.mongodb.filter.MongoFilterBuilder;
-import win.doyto.query.mongodb.session.MongoSessionSupplier;
 import win.doyto.query.mongodb.session.MongoSessionThreadLocalSupplier;
 import win.doyto.query.util.BeanUtil;
 
@@ -45,6 +45,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -62,17 +63,17 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
     @Getter
     private final MongoCollection<Document> collection;
 
-    private final MongoSessionSupplier mongoSessionSupplier;
+    private final Supplier<ClientSession> mongoSessionSupplier;
     private final AggregationMetadata<MongoCollection<Document>> md;
 
-    public MongoDataAccess(MongoClient mongoClient, Class<E> entityClass) {
-        this(entityClass, MongoSessionThreadLocalSupplier.create(mongoClient));
+    MongoDataAccess(MongoClient mongoClient, Class<E> entityClass) {
+        this(entityClass, mongoClient, MongoSessionThreadLocalSupplier.create(mongoClient));
     }
 
-    public MongoDataAccess(Class<E> entityClass, MongoSessionSupplier mongoSessionSupplier) {
+    public MongoDataAccess(Class<E> entityClass, MongoClient mongoClient, Supplier<ClientSession> mongoSessionSupplier) {
         this.entityClass = entityClass;
         this.mongoSessionSupplier = mongoSessionSupplier;
-        CollectionProvider collectionProvider = new CollectionProvider(mongoSessionSupplier.getMongoClient());
+        CollectionProvider collectionProvider = new CollectionProvider(mongoClient);
         this.md = AggregationMetadata.build(entityClass, collectionProvider);
         this.collection = md.getCollection();
     }

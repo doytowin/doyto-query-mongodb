@@ -16,6 +16,7 @@
 
 package win.doyto.query.mongodb;
 
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -25,12 +26,12 @@ import org.bson.types.ObjectId;
 import win.doyto.query.config.GlobalConfiguration;
 import win.doyto.query.core.AssociationService;
 import win.doyto.query.core.UniqueKey;
-import win.doyto.query.mongodb.session.MongoSessionSupplier;
 import win.doyto.query.mongodb.session.MongoSessionThreadLocalSupplier;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * MongoAssociationService
@@ -39,18 +40,18 @@ import java.util.Set;
  */
 public class MongoAssociationService implements AssociationService<ObjectId, ObjectId> {
     private final MongoCollection<Document> collection;
-    private final MongoSessionSupplier mongoSessionSupplier;
+    private final Supplier<ClientSession> mongoSessionSupplier;
     private final String domainId1;
     private final String domainId2;
 
-    public MongoAssociationService(MongoClient mongoClient,String database, String domain1, String domain2) {
-        this(MongoSessionThreadLocalSupplier.create(mongoClient), database, domain1, domain2);
+    MongoAssociationService(MongoClient mongoClient,String database, String domain1, String domain2) {
+        this(mongoClient, MongoSessionThreadLocalSupplier.create(mongoClient), database, domain1, domain2);
     }
 
-    public MongoAssociationService(MongoSessionSupplier mongoSessionSupplier, String database, String domain1, String domain2) {
+    public MongoAssociationService(MongoClient mongoClient, Supplier<ClientSession> mongoSessionSupplier, String database, String domain1, String domain2) {
         String joinTableFormat = GlobalConfiguration.instance().getJoinTableFormat();
         String joinTable = String.format(joinTableFormat, domain1, domain2);
-        this.collection = mongoSessionSupplier.getMongoClient().getDatabase(database).getCollection(joinTable);
+        this.collection = mongoClient.getDatabase(database).getCollection(joinTable);
         this.mongoSessionSupplier = mongoSessionSupplier;
         String joinIdFormat = GlobalConfiguration.instance().getJoinIdFormat();
         this.domainId1 = String.format(joinIdFormat, domain1);

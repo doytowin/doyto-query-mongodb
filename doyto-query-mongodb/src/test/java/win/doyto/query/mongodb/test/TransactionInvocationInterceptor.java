@@ -54,7 +54,7 @@ public class TransactionInvocationInterceptor implements InvocationInterceptor, 
             ReflectiveInvocationContext<Method> invocationContext,
             ExtensionContext extensionContext
     ) {
-        ClientSession clientSession = mongoSessionSupplier.get();
+        ClientSession clientSession = mongoSessionSupplier.get(true);
         RuntimeException abort = new RuntimeException("Abort");
         try {
             clientSession.withTransaction(() -> {
@@ -75,6 +75,8 @@ public class TransactionInvocationInterceptor implements InvocationInterceptor, 
             if (abort != e) {
                 throw e;
             }
+        } finally {
+            mongoSessionSupplier.release();
         }
     }
 }

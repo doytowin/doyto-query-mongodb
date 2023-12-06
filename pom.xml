@@ -23,7 +23,7 @@
     <parent>
         <groupId>win.doyto</groupId>
         <artifactId>doyto-oss-parent</artifactId>
-        <version>3</version>
+        <version>5</version>
     </parent>
 
     <artifactId>doyto-query-mongodb-repo</artifactId>
@@ -40,7 +40,7 @@
         <doyto-query.version>1.0.1</doyto-query.version>
 
         <sourceDirectory>src/main/java</sourceDirectory>
-        <skipDeploy>true</skipDeploy>
+        <maven.deploy.skip>true</maven.deploy.skip>
 
         <jacoco.destFile>${user.dir}/target/jacoco.exec</jacoco.destFile>
         <jacoco.dataFile>${user.dir}/target/jacoco.exec</jacoco.dataFile>
@@ -92,57 +92,6 @@
                 </includes>
             </testResource>
         </testResources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <skip>${skipDeploy}</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <skip>${skipDeploy}</skip>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.3.0</version>
-                <configuration>
-                    <updatePomFile>true</updatePomFile>
-                    <flattenMode>bom</flattenMode>
-                    <flattenedPomFilename>target/${project.artifactId}.pom.xml</flattenedPomFilename>
-                    <pomElements>
-                        <version>resolve</version>
-                        <properties>resolve</properties>
-                        <dependencies>resolve</dependencies>
-                        <pluginManagement>resolve</pluginManagement>
-                    </pomElements>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>flatten.clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
     <scm>
         <tag>main</tag>

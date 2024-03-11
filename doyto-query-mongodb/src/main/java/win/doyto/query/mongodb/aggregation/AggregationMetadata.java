@@ -28,19 +28,22 @@ import win.doyto.query.config.GlobalConfiguration;
 import win.doyto.query.core.AggregationQuery;
 import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.core.Having;
+import win.doyto.query.mongodb.annotation.AggregateField;
+import win.doyto.query.mongodb.annotation.AggregateFields;
+import win.doyto.query.mongodb.annotation.Expression;
 import win.doyto.query.mongodb.filter.EmptyBson;
 import win.doyto.query.mongodb.filter.MongoFilterBuilder;
 import win.doyto.query.mongodb.filter.MongoGroupBuilder;
 import win.doyto.query.util.ColumnUtil;
 import win.doyto.query.util.CommonUtil;
 
+import javax.persistence.GeneratedValue;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.persistence.GeneratedValue;
 
 import static win.doyto.query.mongodb.MongoConstant.*;
 import static win.doyto.query.mongodb.aggregation.DomainPathBuilder.buildLookUpForSubDomain;
@@ -84,6 +87,7 @@ public class AggregationMetadata<C> {
 
     private static <V> Bson buildGroupBy(Class<V> viewClass, Document groupDoc) {
         List<BsonField> fieldAccumulators = collectAccumulators(viewClass);
+        collectAggregateFields(viewClass, fieldAccumulators);
         if (groupDoc.isEmpty() && fieldAccumulators.isEmpty()) {
             return null;
         }
@@ -96,6 +100,15 @@ public class AggregationMetadata<C> {
                      .map(MongoGroupBuilder::getBsonField)
                      .filter(Objects::nonNull)
                      .collect(Collectors.toList());
+    }
+
+    private static void collectAggregateFields(Class<?> viewClass, List<BsonField> fieldAccumulators) {
+        AggregateFields aggregateFields = viewClass.getAnnotation(AggregateFields.class);
+        if (aggregateFields != null) {
+            for (AggregateField aggregateField : aggregateFields.value()) {
+                fieldAccumulators.add(MongoGroupBuilder.buildAggregateField(aggregateField.value()));
+            }
+        }
     }
 
     private static <V> Document buildGroupId(Class<V> viewClass) {
@@ -123,6 +136,9 @@ public class AggregationMetadata<C> {
             String column = field.getName();
             if (isManyToOneField(field)) {
                 columns.append(column, new Document("$arrayElemAt", Arrays.asList(ex(column), 0)));
+            } else if (field.isAnnotationPresent(Expression.class)) {
+                Expression exp = field.getAnnotation(Expression.class);
+                columns.append(column, new Document(exp.operator(), Arrays.asList(exp.value())));
             } else {
                 columns.append(column, ex(column));
             }

@@ -102,8 +102,8 @@ class MongoDataQueryClientTest extends MongoApplicationTest {
         List<QuantityByStatusView> views = dataQueryClient.aggregate(query, QuantityByStatusView.class);
         assertThat(views).hasSize(1)
                          .first()
-                         .extracting("sumQty", "status")
-                         .containsExactly(120, "A")
+                         .extracting("sumQty", "status", "diffQty")
+                         .containsExactly(120, "A", 25)
         ;
     }
 

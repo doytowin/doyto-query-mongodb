@@ -19,10 +19,12 @@ package win.doyto.query.mongodb.test.aggregate;
 import lombok.Getter;
 import lombok.Setter;
 import win.doyto.query.annotation.GroupBy;
+import win.doyto.query.mongodb.annotation.AggregateField;
+import win.doyto.query.mongodb.annotation.Expression;
 
-import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.EntityType;
+import java.util.List;
 
 /**
  * QuantityView
@@ -32,12 +34,17 @@ import javax.persistence.EntityType;
 @Getter
 @Setter
 @Entity(type = EntityType.MONGO_DB, database = "doyto", name = "c_inventory")
+@AggregateField("maxQty")
+@AggregateField("minQty")
 public class QuantityByStatusView {
 
     @GroupBy
     private String status;
 
     private Long count;
+
+    @Expression(operator = "$subtract", value = {"$maxQty", "$minQty"})
+    private Integer diffQty;
 
     private Integer sumQty;
 

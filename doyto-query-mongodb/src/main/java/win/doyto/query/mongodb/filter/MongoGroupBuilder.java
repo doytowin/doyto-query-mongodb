@@ -65,6 +65,11 @@ public class MongoGroupBuilder {
         if (aggregationPrefix == push) {
             return buildPushField(field);
         }
+        return buildAggregateField(viewFieldName);
+    }
+
+    public static BsonField buildAggregateField(String viewFieldName) {
+        AggregationPrefix aggregationPrefix = AggregationPrefix.resolveField(viewFieldName);
         String fieldName = "$" + CommonUtil.camelize(aggregationPrefix.resolveColumnName(viewFieldName));
         return build(viewFieldName, aggregationPrefix, fieldName);
     }

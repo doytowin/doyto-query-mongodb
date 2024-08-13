@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package win.doyto.query.mongodb.filter;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
-import lombok.experimental.UtilityClass;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonDocument;
 import org.bson.BsonNull;
@@ -49,7 +50,7 @@ import static win.doyto.query.core.QuerySuffix.*;
  *
  * @author f0rb on 2021-11-23
  */
-@UtilityClass
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MongoFilterBuilder {
 
     private static final Map<QuerySuffix, BiFunction<String, Object, Bson>> suffixFuncMap;
@@ -97,14 +98,11 @@ public class MongoFilterBuilder {
     public static Bson buildFilter(Object query, String prefix) {
         List<Bson> filters = new ArrayList<>();
         buildFilter(query, prefix, filters);
-        switch (filters.size()) {
-            case 0:
-                return EMPTY_DOCUMENT;
-            case 1:
-                return filters.get(0);
-            default:
-                return and(filters);
-        }
+        return switch (filters.size()) {
+            case 0 -> EMPTY_DOCUMENT;
+            case 1 -> filters.get(0);
+            default -> and(filters);
+        };
     }
 
     private static void buildFilter(Object query, String prefix, List<Bson> filters) {
@@ -112,9 +110,9 @@ public class MongoFilterBuilder {
         Field[] fields = ColumnUtil.initFields(query.getClass());
         for (Field field : fields) {
             Object value = CommonUtil.readFieldGetter(field, query);
-            if (value instanceof Bson) {
+            if (value instanceof Bson filter) {
                 // process Bson value directly
-                filters.add((Bson) value);
+                filters.add(filter);
             } else if (isValidValue(value, field)) {
                 String newPrefix = prefix + field.getName();
                 if (value instanceof NestedQuery) {

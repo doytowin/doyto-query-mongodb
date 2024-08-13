@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package win.doyto.query.mongodb.test.aggregate;
 
 import lombok.Getter;
 import lombok.Setter;
+import win.doyto.query.annotation.Entity;
+import win.doyto.query.annotation.EntityType;
 import win.doyto.query.mongodb.entity.MongoPersistable;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityType;
 
 /**
  * QuantityView

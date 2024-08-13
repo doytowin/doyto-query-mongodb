@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,13 +166,9 @@ public abstract class MongoTransactionManager extends AbstractPlatformTransactio
 
         try {
             ServerSession serverSession = session.getServerSession();
-            if (serverSession != null) {
-                debugString += String.format("id = %s, ", serverSession.getIdentifier());
-                debugString += String.format("txNumber = %d, ", serverSession.getTransactionNumber());
-                debugString += String.format("closed = %b, ", serverSession.isClosed());
-            } else {
-                debugString += "id = n/a";
-            }
+            debugString += String.format("id = %s, ", serverSession.getIdentifier());
+            debugString += String.format("txNumber = %d, ", serverSession.getTransactionNumber());
+            debugString += String.format("closed = %b, ", serverSession.isClosed());
             debugString += String.format("causallyConsistent = %s, ", session.isCausallyConsistent());
             debugString += String.format("txActive = %s, ", session.hasActiveTransaction());
             debugString += String.format("clusterTime = %s", session.getClusterTime());

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.types.ObjectId;
+import win.doyto.query.annotation.GeneratedValue;
 import win.doyto.query.entity.AbstractPersistable;
 
 import java.io.Serializable;
-import javax.persistence.GeneratedValue;
 
 /**
  * AbstractMongoPersistable

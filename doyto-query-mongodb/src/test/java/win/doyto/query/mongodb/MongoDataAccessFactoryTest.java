@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package win.doyto.query.mongodb;
 
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanFactory;
+import win.doyto.query.annotation.EntityType;
 import win.doyto.query.core.DataAccess;
 import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.mongodb.test.inventory.InventoryEntity;
-
-import javax.annotation.Resource;
-import javax.persistence.EntityType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

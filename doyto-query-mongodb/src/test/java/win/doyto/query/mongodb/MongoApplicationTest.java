@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ abstract class MongoApplicationTest {
 
     @SneakyThrows
     protected static void loadData(String path) {
-        List<InventoryEntity> data = BeanUtil.loadJsonData(path, new TypeReference<List<InventoryEntity>>() {});
+        List<InventoryEntity> data = BeanUtil.loadJsonData(path, new TypeReference<>() {});
         dataAccess.batchInsert(data);
     }
 

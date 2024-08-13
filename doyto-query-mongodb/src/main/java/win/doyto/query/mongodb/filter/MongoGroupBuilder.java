@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package win.doyto.query.mongodb.filter;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.BsonField;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import win.doyto.query.core.AggregationPrefix;
 import win.doyto.query.util.ColumnUtil;
-import win.doyto.query.util.CommonUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -70,7 +70,7 @@ public class MongoGroupBuilder {
 
     public static BsonField buildAggregateField(String viewFieldName) {
         AggregationPrefix aggregationPrefix = AggregationPrefix.resolveField(viewFieldName);
-        String fieldName = "$" + CommonUtil.camelize(aggregationPrefix.resolveColumnName(viewFieldName));
+        String fieldName = "$" + StringUtils.uncapitalize(aggregationPrefix.resolveColumnName(viewFieldName));
         return build(viewFieldName, aggregationPrefix, fieldName);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,27 +63,28 @@ public class MongoAssociationService implements AssociationService<ObjectId, Obj
         if (uniqueKeys.isEmpty()) {
             return 0;
         }
-        List<Document> list = new ArrayList<>(uniqueKeys.size());
-        for (UniqueKey<ObjectId, ObjectId> uniqueKey : uniqueKeys) {
-            Document doc = new Document(domainId1, uniqueKey.getK1()).append(domainId2, uniqueKey.getK2());
-            list.add(doc);
-        }
+        List<Document> list = buildKeysFilter(uniqueKeys);
         return collection.insertMany(mongoSessionSupplier.get(), list).getInsertedIds().size();
     }
 
     @Override
     public int dissociate(Set<UniqueKey<ObjectId, ObjectId>> uniqueKeys) {
-        Bson filter = buildKeysFilter(uniqueKeys);
+        Bson filter = buildOrFilter(uniqueKeys);
         return (int) collection.deleteMany(mongoSessionSupplier.get(), filter).getDeletedCount();
     }
 
-    private Bson buildKeysFilter(Set<UniqueKey<ObjectId, ObjectId>> uniqueKeys) {
-        List<Bson> filters = new ArrayList<>(uniqueKeys.size());
+    private List<Document> buildKeysFilter(Set<UniqueKey<ObjectId, ObjectId>> uniqueKeys) {
+        List<Document> filters = new ArrayList<>(uniqueKeys.size());
         for (UniqueKey<ObjectId, ObjectId> uniqueKey : uniqueKeys) {
             Document doc = new Document(domainId1, uniqueKey.getK1()).append(domainId2, uniqueKey.getK2());
             filters.add(doc);
         }
-        return Filters.or(filters);
+        return filters;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private Bson buildOrFilter(Set<UniqueKey<ObjectId, ObjectId>> uniqueKeys) {
+        return Filters.or((List) buildKeysFilter(uniqueKeys));
     }
 
     @Override
@@ -114,7 +115,7 @@ public class MongoAssociationService implements AssociationService<ObjectId, Obj
 
     @Override
     public long count(Set<UniqueKey<ObjectId, ObjectId>> uniqueKeys) {
-        Bson filter = buildKeysFilter(uniqueKeys);
+        Bson filter = buildOrFilter(uniqueKeys);
         return collection.countDocuments(mongoSessionSupplier.get(), filter);
     }
 }

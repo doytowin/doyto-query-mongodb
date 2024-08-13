@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import java.lang.annotation.*;
 @Inherited
 @Documented
 @Retryable(
-        value = MongoCommandException.class,
-        exceptionExpression = "#{message.contains('WriteConflict error')}",
+        retryFor = MongoCommandException.class,
+        exceptionExpression = "#{message.contains('(WriteConflict)')}",
         backoff = @Backoff(maxDelay = 100, random = true)
 )
 @Transactional(

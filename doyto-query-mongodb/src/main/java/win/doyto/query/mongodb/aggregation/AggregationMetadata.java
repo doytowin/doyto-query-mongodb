@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import win.doyto.query.annotation.DomainPath;
+import win.doyto.query.annotation.GeneratedValue;
 import win.doyto.query.annotation.GroupBy;
 import win.doyto.query.config.GlobalConfiguration;
 import win.doyto.query.core.AggregationQuery;
@@ -37,7 +38,6 @@ import win.doyto.query.mongodb.filter.MongoGroupBuilder;
 import win.doyto.query.util.ColumnUtil;
 import win.doyto.query.util.CommonUtil;
 
-import javax.persistence.GeneratedValue;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
@@ -94,6 +94,7 @@ public class AggregationMetadata<C> {
         return Aggregates.group(groupDoc, fieldAccumulators);
     }
 
+    @SuppressWarnings("java:S6204")
     private static <V> List<BsonField> collectAccumulators(Class<V> viewClass) {
         Field[] fields = ColumnUtil.initFields(viewClass);
         return Arrays.stream(fields)
@@ -144,7 +145,7 @@ public class AggregationMetadata<C> {
             }
             if (field.isAnnotationPresent(GroupBy.class)) {
                 String fieldName = field.getName();
-                columns.append(fieldName, "$_id." + fieldName); //grouped fields are in _id
+                columns.append(fieldName, "$_id." + fieldName); // grouped fields are in _id
             }
         }
 
@@ -203,21 +204,21 @@ public class AggregationMetadata<C> {
         for (Field field : this.getDomainFields()) {
             String queryFieldName = buildQueryFieldName(field);
             Object domainQuery = CommonUtil.readField(query, queryFieldName);
-            if (domainQuery instanceof DoytoQuery) {
+            if (domainQuery instanceof DoytoQuery doytoQuery) {
                 Class<?> relatedViewClass = field.getType();
                 if (Collection.class.isAssignableFrom(field.getType())) {
                     ParameterizedType type = (ParameterizedType) field.getGenericType();
                     relatedViewClass = (Class<?>) type.getActualTypeArguments()[0];
                 }
-                Bson lookupDoc = buildLookUpForSubDomain((DoytoQuery) domainQuery, relatedViewClass, field);
+                Bson lookupDoc = buildLookUpForSubDomain(doytoQuery, relatedViewClass, field);
                 pipeline.add(lookupDoc);
             }
         }
         if (this.getGroupBy() != null) {
             pipeline.add(this.getGroupBy());
         }
-        if (query instanceof AggregationQuery) {
-            Having having = ((AggregationQuery) query).getHaving();
+        if (query instanceof AggregationQuery aggregationQuery) {
+            Having having = aggregationQuery.getHaving();
             if (having != null) {
                 pipeline.add(buildHaving(having));
             }

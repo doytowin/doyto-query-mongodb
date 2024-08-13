@@ -17,7 +17,7 @@ jobs:
     secrets: inherit
     with:
       sonar-project-name: 'doyto-query-mongodb'
-      sonar-project-key: 'win.doyto:doyto-query-mongodb'
+      sonar-project-key: 'win.doyto:doyto-query-mongodb-repo'
   javadoc:
     needs: version
     name: Call Javadoc Workflow

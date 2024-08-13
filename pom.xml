@@ -41,6 +41,7 @@
         <sourceDirectory>src/main/java</sourceDirectory>
         <maven.deploy.skip>true</maven.deploy.skip>
 
+        <sonar.exclusions>**/pom.xml</sonar.exclusions>
         <jacoco.destFile>${user.dir}/target/jacoco.exec</jacoco.destFile>
         <jacoco.dataFile>${user.dir}/target/jacoco.exec</jacoco.dataFile>
     </properties>

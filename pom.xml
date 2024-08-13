@@ -33,7 +33,7 @@
     <properties>
         <spring-boot.version>3.3.1</spring-boot.version>
         <embedded-mongo.version>4.16.2</embedded-mongo.version>
-        <doyto-query.version>2.0.0</doyto-query.version>
+        <doyto-query.version>2.0.1-SNAPSHOT</doyto-query.version>
 
         <java.version>17</java.version>
         <sourceDirectory>src/main/java</sourceDirectory>

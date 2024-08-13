@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class DomainPathBuilder {
         String viewName = field.getName();
 
         Document projectDoc = new Document();
-        ColumnUtil.filterFields(viewClass).forEach(f -> projectDoc.append(f.getName(), PROJECTING));
+        ColumnUtil.getColumnFieldsFrom(viewClass).forEach(f -> projectDoc.append(f.getName(), PROJECTING));
         DomainPathDetail domainPathDetail = DomainPathDetail.buildBy(domainPath, DomainPathBuilder::mapIdField);
 
         if (domainPathDetail.onlyOneDomain()) {

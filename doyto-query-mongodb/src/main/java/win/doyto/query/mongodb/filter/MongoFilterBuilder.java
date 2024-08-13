@@ -73,7 +73,9 @@ public class MongoFilterBuilder {
         suffixFuncMap.put(In, (fieldName, values) -> Filters.in(fieldName, (Iterable<?>) values));
         suffixFuncMap.put(NotIn, (fieldName, values) -> Filters.nin(fieldName, (Iterable<?>) values));
         suffixFuncMap.put(Not, Filters::ne);
-        suffixFuncMap.put(Null, (name, value) -> Filters.eq(name, BsonNull.VALUE));
+        suffixFuncMap.put(Null, (name, value) -> Boolean.TRUE.equals(value)
+                ? Filters.eq(name, BsonNull.VALUE)
+                : Filters.ne(name, BsonNull.VALUE));
         suffixFuncMap.put(NotNull, (name, value) -> Filters.ne(name, BsonNull.VALUE));
         suffixFuncMap.put(Exists, (name, value) -> Filters.exists(name, (boolean) value));
 

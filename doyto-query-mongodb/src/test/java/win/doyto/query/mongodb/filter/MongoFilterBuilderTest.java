@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ class MongoFilterBuilderTest {
             "{\"userLevel\": \"VIP\"}, {\"userLevel\": 0}",
             "{\"userLevelNot\": \"VIP\"}, {\"userLevel\": {\"$ne\": 0}}",
             "{\"memoNull\": true}, {\"memo\": null}",
-            "{\"memoNotNull\": true}, {\"memo\": {\"$ne\": null}}",
+            "{\"memoNull\": false}, {\"memo\": {\"$ne\": null}}",
             "{\"statusExists\": true}, {\"status\": {\"$exists\": true}}",
     })
     void testFilterSuffix(String data, String expected) {

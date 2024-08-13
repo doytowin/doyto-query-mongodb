@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import win.doyto.query.config.GlobalConfiguration;
 import win.doyto.query.core.DataAccess;
 import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.core.IdWrapper;
+import win.doyto.query.core.PageList;
 import win.doyto.query.entity.Persistable;
 import win.doyto.query.mongodb.aggregation.AggregationMetadata;
 import win.doyto.query.mongodb.aggregation.CollectionProvider;
@@ -104,6 +105,11 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
     @Override
     public long count(Q query) {
         return collection.countDocuments(mongoSessionSupplier.get(), MongoFilterBuilder.buildFilter(query));
+    }
+
+    @Override
+    public PageList<E> page(Q query) {
+        return new PageList<>(query(query), count(query));
     }
 
     @Override

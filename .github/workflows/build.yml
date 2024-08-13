@@ -8,6 +8,9 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  version:
+    name: Determine Java version
+    uses: doytowin/doyto-devops/.github/workflows/version_java17.yml@main
   build:
     name: Call Build Workflow
     uses: doytowin/doyto-devops/.github/workflows/build.yml@main
@@ -15,9 +18,20 @@ jobs:
     with:
       sonar-project-name: 'doyto-query-mongodb'
       sonar-project-key: 'win.doyto:doyto-query-mongodb'
+  javadoc:
+    needs: version
+    name: Call Javadoc Workflow
+    uses: doytowin/doyto-devops/.github/workflows/javadoc.yml@main
+    with:
+      java-version: ${{needs.version.outputs.java}}
   deploy:
     name: Call Deploy Workflow
-    needs: build
-    if: github.event_name != 'pull_request'
+    needs:
+      - version
+      - build
+      - javadoc
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/java8/'))
     uses: doytowin/doyto-devops/.github/workflows/deploy.yml@main
     secrets: inherit
+    with:
+      java-version: ${{needs.version.outputs.java}}

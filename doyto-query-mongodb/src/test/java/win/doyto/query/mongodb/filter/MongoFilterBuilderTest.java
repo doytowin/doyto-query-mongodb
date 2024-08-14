@@ -95,6 +95,7 @@ class MongoFilterBuilderTest {
         assertEquals(expected, filters.toBsonDocument().toJson());
     }
 
+    @SuppressWarnings("java:S4144")
     @ParameterizedTest
     @CsvSource(value = {
             "{\"conditionOr\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15}}" +
@@ -107,6 +108,8 @@ class MongoFilterBuilderTest {
                     "{\"status\": {\"$in\": [\"A\", \"D\"]}}]}",
             "{\"conditionOr\":{},\"itemContain\":\"test\"}" +
                     "| {\"item\": {\"$regex\": \"test\"}}",
+            "{\"statusOr\":[\"A\", \"D\"],\"itemContain\":\"test\"}" +
+                    "| {\"$and\": [{\"item\": {\"$regex\": \"test\"}}, {\"$or\": [{\"status\": \"A\"}, {\"status\": \"D\"}]}]}",
     }, delimiter = '|')
     void testOrFilter(String data, String expected) {
         InventoryQuery query = BeanUtil.parse(data, InventoryQuery.class);
@@ -149,7 +152,7 @@ class MongoFilterBuilderTest {
                     "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"$box\": [[1.0, 2.0], [2.0, 1.0]]}}}}",
             "{\"locBsonIntX\":  {\"loc\": {\"$geoIntersects\": {\"$geometry\":{\"type\": \"LineString\", \"coordinates\": [[1.0, 1.0], [2.0, 2.5]]}}}}}" +
                     "| {\"loc\": {\"$geoIntersects\": {\"$geometry\": {\"type\": \"LineString\", \"coordinates\": [[1.0, 1.0], [2.0, 2.5]]}}}}",
-       
+
             "{\"locWithin\": {\"type\": \"Point\", \"coordinates\": [1.0, 2.5]}}}" +
                     "| {\"loc\": {\"$geoWithin\": {\"$geometry\": {\"type\": \"Point\", \"coordinates\": [1.0, 2.5]}}}}",
             "{\"locWithin\": {\"type\": \"Line\", \"coordinates\": [[1.0, 2.5], [3.2, 1.5]]}}}" +

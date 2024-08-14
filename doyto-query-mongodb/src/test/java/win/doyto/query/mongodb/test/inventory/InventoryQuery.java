@@ -23,6 +23,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import win.doyto.query.core.PageQuery;
 
+import java.util.List;
+
 /**
  * InventoryQuery
  *
@@ -41,6 +43,7 @@ public class InventoryQuery extends PageQuery {
     private String itemEnd;
     private String status;
     private SizeQuery size;
+    private List<String> statusOr;
     private Conditions conditionOr;
 
 }

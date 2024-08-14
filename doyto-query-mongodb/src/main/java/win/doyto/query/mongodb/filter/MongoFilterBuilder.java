@@ -117,7 +117,7 @@ public class MongoFilterBuilder {
             } else if (isValidValue(value, field)) {
                 String newPrefix = prefix + field.getName();
                 if (field.getName().endsWith("Or")) {
-                    buildOrFilter(value, filters);
+                    buildOrFilters(filters, value, newPrefix);
                 } else if (value instanceof Query) {
                     buildFilter(value, newPrefix, filters);
                 } else if (value instanceof DoytoQuery) {
@@ -129,6 +129,16 @@ public class MongoFilterBuilder {
                     filters.add(resolveFilter(newPrefix, value));
                 }
             }
+        }
+    }
+
+    private static void buildOrFilters(List<Bson> filters, Object value, String newPrefix) {
+        if (value instanceof Collection<?> list) {
+            String fieldName = newPrefix.substring(0, newPrefix.length() - 2);
+            List<Bson> orFilters = list.stream().map(v -> resolveFilter(fieldName, v)).toList();
+            filters.add(or(orFilters));
+        } else {
+            buildOrFilter(value, filters);
         }
     }
 

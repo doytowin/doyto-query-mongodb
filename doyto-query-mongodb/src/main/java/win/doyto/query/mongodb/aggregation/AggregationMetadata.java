@@ -26,6 +26,7 @@ import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.annotation.GeneratedValue;
 import win.doyto.query.annotation.GroupBy;
 import win.doyto.query.config.GlobalConfiguration;
+import win.doyto.query.core.AggregatedQuery;
 import win.doyto.query.core.AggregationQuery;
 import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.core.Having;
@@ -157,19 +158,33 @@ public class AggregationMetadata<C> {
     }
 
     public <Q extends DoytoQuery> List<Bson> buildAggregation(Q query) {
-        List<Bson> pipeline = build(query, false);
+        List<Bson> pipeline = build(query, null);
+        return buildPaging(pipeline, query);
+    }
+
+    public <Q extends AggregatedQuery> List<Bson> buildByAggregatedQuery(Q query) {
+        List<Bson> pipeline = build(query.getEntityQuery(), query);
+        return buildPaging(pipeline, query);
+    }
+
+    private <Q extends DoytoQuery> List<Bson> buildPaging(List<Bson> pipeline, Q query) {
+        pipeline.add(buildSort(query, this.getGroupId().keySet()));
+        if (query.needPaging()) {
+            pipeline.add(Aggregates.skip(GlobalConfiguration.calcOffset(query)));
+            pipeline.add(Aggregates.limit(query.getPageSize()));
+        }
         pipeline.add(this.getProject());
         return pipeline;
     }
 
     public <Q extends DoytoQuery> List<Bson> buildCount(Q query) {
-        List<Bson> pipeline = build(query, true);
+        List<Bson> pipeline = build(query,  null);
         pipeline.add(Aggregates.count(COUNT_KEY));
         return pipeline;
     }
 
     @SuppressWarnings("java:S3776")
-    private <Q extends DoytoQuery> List<Bson> build(Q query, boolean forCount) {
+    private <Q extends DoytoQuery> List<Bson> build(Q query, Having having) {
         List<Bson> pipeline = new ArrayList<>();
 
         List<Field> lookupFields = new ArrayList<>();
@@ -217,18 +232,11 @@ public class AggregationMetadata<C> {
         if (this.getGroupBy() != null) {
             pipeline.add(this.getGroupBy());
         }
-        if (query instanceof AggregationQuery aggregationQuery) {
-            Having having = aggregationQuery.getHaving();
-            if (having != null) {
-                pipeline.add(buildHaving(having));
-            }
+        if (having == null && query instanceof AggregationQuery aggregationQuery) {
+            having = aggregationQuery.getHaving();
         }
-        if (!forCount) {
-            pipeline.add(buildSort(query, this.getGroupId().keySet()));
-            if (query.needPaging()) {
-                pipeline.add(Aggregates.skip(GlobalConfiguration.calcOffset(query)));
-                pipeline.add(Aggregates.limit(query.getPageSize()));
-            }
+        if (having != null) {
+            pipeline.add(buildHaving(having));
         }
         return pipeline;
     }

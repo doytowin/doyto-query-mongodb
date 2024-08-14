@@ -97,15 +97,15 @@ class MongoFilterBuilderTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            "{\"condition\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15}}" +
+            "{\"conditionOr\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15}}" +
                     "| {\"$or\": [{\"status\": {\"$in\": [\"A\", \"D\"]}}, {\"qty\": {\"$gt\": 15}}]}",
-            "{\"condition\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15},\"itemContain\":\"test\"}" +
+            "{\"conditionOr\":{\"statusIn\":[\"A\",\"D\"],\"qtyGt\":15},\"itemContain\":\"test\"}" +
                     "| {\"$and\": [{\"item\": {\"$regex\": \"test\"}}, " +
                     "{\"$or\": [{\"status\": {\"$in\": [\"A\", \"D\"]}}, {\"qty\": {\"$gt\": 15}}]}]}",
-            "{\"condition\":{\"statusIn\":[\"A\",\"D\"]},\"itemContain\":\"test\"}" +
+            "{\"conditionOr\":{\"statusIn\":[\"A\",\"D\"]},\"itemContain\":\"test\"}" +
                     "| {\"$and\": [{\"item\": {\"$regex\": \"test\"}}, " +
                     "{\"status\": {\"$in\": [\"A\", \"D\"]}}]}",
-            "{\"condition\":{},\"itemContain\":\"test\"}" +
+            "{\"conditionOr\":{},\"itemContain\":\"test\"}" +
                     "| {\"item\": {\"$regex\": \"test\"}}",
     }, delimiter = '|')
     void testOrFilter(String data, String expected) {

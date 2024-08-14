@@ -27,7 +27,6 @@ import org.bson.BsonString;
 import org.bson.conversions.Bson;
 import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.core.DoytoQuery;
-import win.doyto.query.core.Or;
 import win.doyto.query.core.Query;
 import win.doyto.query.core.QuerySuffix;
 import win.doyto.query.entity.Persistable;
@@ -117,15 +116,15 @@ public class MongoFilterBuilder {
                 filters.add(filter);
             } else if (isValidValue(value, field)) {
                 String newPrefix = prefix + field.getName();
-                if (value instanceof Query) {
+                if (field.getName().endsWith("Or")) {
+                    buildOrFilter(value, filters);
+                } else if (value instanceof Query) {
                     buildFilter(value, newPrefix, filters);
                 } else if (value instanceof DoytoQuery) {
                     if (field.isAnnotationPresent(DomainPath.class)) {
                         buildFilter(value, newPrefix, filters);
                     }
                     // ignore related query value and domain query inside a nested query
-                } else if (value instanceof Or) {
-                    buildOrFilter(value, filters);
                 } else {
                     filters.add(resolveFilter(newPrefix, value));
                 }

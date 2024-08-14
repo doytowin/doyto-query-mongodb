@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import win.doyto.query.mongodb.test.inventory.InventoryEntity;
 import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 import win.doyto.query.mongodb.test.inventory.InventorySize;
 import win.doyto.query.mongodb.test.inventory.SizeQuery;
-import win.doyto.query.mongodb.test.user.UserView;
-import win.doyto.query.mongodb.test.user.UserViewQuery;
+import win.doyto.query.mongodb.test.user.UserEntity;
+import win.doyto.query.mongodb.test.user.UserQuery;
 import win.doyto.query.test.role.RoleQuery;
 
 import java.math.BigInteger;
@@ -45,11 +45,11 @@ import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ_WRITE;
 @ResourceLock(value = "inventory", mode = READ_WRITE)
 class MongoDataAccessTest extends MongoApplicationTest {
     MongoDataAccess<InventoryEntity, String, InventoryQuery> inventoryDataAccess;
-    MongoDataAccess<UserView, BigInteger, UserViewQuery> userDataAccess;
+    MongoDataAccess<UserEntity, BigInteger, UserQuery> userDataAccess;
 
     public MongoDataAccessTest(@Autowired MongoClient mongoClient) {
         this.inventoryDataAccess = new MongoDataAccess<>(mongoClient, InventoryEntity.class);
-        this.userDataAccess = new MongoDataAccess<>(mongoClient, UserView.class);
+        this.userDataAccess = new MongoDataAccess<>(mongoClient, UserEntity.class);
     }
 
     @Test
@@ -341,8 +341,8 @@ class MongoDataAccessTest extends MongoApplicationTest {
     void supportNestedQuery() {
         // Query users who are assigned valid role.
         RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
-        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleQuery).build();
-        List<UserView> userEntities = userDataAccess.query(userViewQuery);
+        UserQuery userQuery = UserQuery.builder().role(roleQuery).build();
+        List<UserEntity> userEntities = userDataAccess.query(userQuery);
         assertThat(userEntities).hasSize(2);
         assertThat(userEntities).extracting("username")
                                 .containsExactly("f0rb", "user3");
@@ -382,5 +382,49 @@ class MongoDataAccessTest extends MongoApplicationTest {
         //then
         assertThat(entities).extracting("item")
                 .containsExactly("journal", "notebook", "postcard");
+    }
+
+    @Test
+    void queryUserWithCreatedUsersAndCreateUser() {
+        UserQuery userQuery = UserQuery
+                .builder()
+                .withCreatedUsers(new UserQuery())
+                .withCreateUser(new UserQuery())
+                .build();
+
+        List<UserEntity> views = userDataAccess.query(userQuery);
+
+        assertThat(views).hasSize(4)
+                         .extracting(userEntity -> userEntity.getCreatedUsers().size())
+                         .containsExactly(3, 1, 0, 0);
+        assertThat(views)
+                .extracting(userEntity -> userEntity.getCreateUser().getUsername())
+                .containsExactly("f0rb", "f0rb", "f0rb", "user2");
+        assertThat(views).extracting(UserEntity::getRoles).containsOnlyNulls();
+    }
+
+    @Test
+    void supportPagingForAggregation() {
+        UserQuery userQuery = UserQuery.builder().pageNumber(2).pageSize(3).build();
+        List<UserEntity> views = userDataAccess.query(userQuery);
+        assertThat(views).hasSize(1);
+        assertThat(views.get(0).getUsername()).isEqualTo("user4");
+    }
+
+    @Test
+    void supportQueryUserWithValidRole() {
+        RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
+        UserQuery userQuery = UserQuery.builder().role(roleQuery).build();
+        List<UserEntity> userEntities = userDataAccess.query(userQuery);
+        assertThat(userEntities).extracting("username")
+                                .containsExactly("f0rb", "user3");
+    }
+
+    @Test
+    void supportCountUserWithValidRole() {
+        RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
+        UserQuery userQuery = UserQuery.builder().role(roleQuery).build();
+        long count = userDataAccess.count(userQuery);
+        assertThat(count).isEqualTo(2);
     }
 }

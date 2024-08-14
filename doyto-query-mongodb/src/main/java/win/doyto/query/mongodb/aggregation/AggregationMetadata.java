@@ -157,19 +157,19 @@ public class AggregationMetadata<C> {
     }
 
     public <Q extends DoytoQuery> List<Bson> buildAggregation(Q query) {
-        List<Bson> pipeline = build(query);
+        List<Bson> pipeline = build(query, false);
         pipeline.add(this.getProject());
         return pipeline;
     }
 
     public <Q extends DoytoQuery> List<Bson> buildCount(Q query) {
-        List<Bson> pipeline = build(query);
+        List<Bson> pipeline = build(query, true);
         pipeline.add(Aggregates.count(COUNT_KEY));
         return pipeline;
     }
 
     @SuppressWarnings("java:S3776")
-    private <Q extends DoytoQuery> List<Bson> build(Q query) {
+    private <Q extends DoytoQuery> List<Bson> build(Q query, boolean forCount) {
         List<Bson> pipeline = new ArrayList<>();
 
         List<Field> lookupFields = new ArrayList<>();
@@ -223,10 +223,12 @@ public class AggregationMetadata<C> {
                 pipeline.add(buildHaving(having));
             }
         }
-        pipeline.add(buildSort(query, this.getGroupId().keySet()));
-        if (query.needPaging()) {
-            pipeline.add(Aggregates.skip(GlobalConfiguration.calcOffset(query)));
-            pipeline.add(Aggregates.limit(query.getPageSize()));
+        if (!forCount) {
+            pipeline.add(buildSort(query, this.getGroupId().keySet()));
+            if (query.needPaging()) {
+                pipeline.add(Aggregates.skip(GlobalConfiguration.calcOffset(query)));
+                pipeline.add(Aggregates.limit(query.getPageSize()));
+            }
         }
         return pipeline;
     }

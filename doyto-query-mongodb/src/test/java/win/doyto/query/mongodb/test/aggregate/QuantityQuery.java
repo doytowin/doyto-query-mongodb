@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.test.menu;
+package win.doyto.query.mongodb.test.aggregate;
 
 import lombok.Getter;
 import lombok.Setter;
-import win.doyto.query.mongodb.entity.MongoPersistable;
-
-import java.math.BigInteger;
+import lombok.experimental.SuperBuilder;
+import win.doyto.query.core.AggregationQuery;
+import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 
 /**
- * MenuView
+ * QuantityQuery
  *
- * @author f0rb on 2022-05-21
+ * @author f0rb on 2022/8/28
  * @since 1.0.0
  */
 @Getter
 @Setter
-public class MenuView extends MongoPersistable<BigInteger> {
-    private String menuName;
-    private String menuCode;
-    private Boolean valid;
+@SuperBuilder
+public class QuantityQuery extends InventoryQuery implements AggregationQuery {
 }

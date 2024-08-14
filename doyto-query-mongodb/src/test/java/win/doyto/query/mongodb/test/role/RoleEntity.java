@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-package win.doyto.query.mongodb.test.inventory;
+package win.doyto.query.mongodb.test.role;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.RelationalQuery;
-import win.doyto.query.mongodb.test.aggregate.QuantityView;
+import win.doyto.query.annotation.Entity;
+import win.doyto.query.annotation.EntityType;
+import win.doyto.query.mongodb.entity.MongoPersistable;
+
+import java.math.BigInteger;
 
 /**
- * QuantityViewQuery
+ * RoleEntity
  *
- * @author f0rb on 2022/8/28
- * @since 1.0.0
+ * @author f0rb on 2022-05-20
  */
 @Getter
 @Setter
-@NoArgsConstructor
-@SuperBuilder
-public class QuantityViewQuery extends InventoryQuery implements RelationalQuery<QuantityView, String> {
+@Entity(type = EntityType.MONGO_DB, database = "doyto", name = "t_role")
+public class RoleEntity extends MongoPersistable<BigInteger> {
 
-    @Override
-    public Class<QuantityView> getDomainClass() {
-        return QuantityView.class;
-    }
+    private String roleName;
+    private String roleCode;
+    private Boolean valid;
+
 }

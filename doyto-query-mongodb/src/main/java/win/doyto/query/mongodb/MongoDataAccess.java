@@ -24,6 +24,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Projections;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -47,10 +48,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.in;
+import static win.doyto.query.mongodb.MongoConstant.COUNT_KEY;
 import static win.doyto.query.mongodb.MongoConstant.MONGO_ID;
 
 /**
@@ -81,8 +82,8 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
 
     private void setObjectId(E entity, Document document) {
         ObjectId objectId = (ObjectId) document.get(MONGO_ID);
-        if (entity instanceof ObjectIdAware) {
-            ((ObjectIdAware) entity).setObjectId(objectId);
+        if (entity instanceof ObjectIdAware objectIdAware) {
+            objectIdAware.setObjectId(objectId);
         }
     }
 
@@ -104,7 +105,12 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
 
     @Override
     public long count(Q query) {
-        return collection.countDocuments(mongoSessionSupplier.get(), MongoFilterBuilder.buildFilter(query));
+        List<Bson> pipeline = md.buildCount(query);
+        Integer count = md.getCollection()
+                          .aggregate(mongoSessionSupplier.get(), pipeline)
+                          .map(document -> document.getInteger(COUNT_KEY))
+                          .first();
+        return ObjectUtils.defaultIfNull(count, 0);
     }
 
     @Override
@@ -213,7 +219,7 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
         return queryObjectId(query)
                 .stream()
                 .<I>map(objectId -> ObjectIdMapper.convert(entityClass, objectId))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<ObjectId> queryObjectId(Q query) {

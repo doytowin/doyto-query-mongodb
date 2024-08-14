@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import win.doyto.query.core.DataQueryClient;
-import win.doyto.query.mongodb.test.aggregate.QuantityByStatusQuery;
-import win.doyto.query.mongodb.test.aggregate.QuantityByStatusView;
-import win.doyto.query.mongodb.test.aggregate.QuantityHaving;
-import win.doyto.query.mongodb.test.aggregate.QuantityView;
-import win.doyto.query.mongodb.test.inventory.QuantityViewQuery;
+import win.doyto.query.mongodb.test.aggregate.*;
+import win.doyto.query.mongodb.test.user.UserEntity;
 import win.doyto.query.mongodb.test.user.UserQuery;
-import win.doyto.query.mongodb.test.user.UserView;
-import win.doyto.query.mongodb.test.user.UserViewQuery;
 import win.doyto.query.test.role.RoleQuery;
 
 import java.util.List;
@@ -51,7 +46,7 @@ class MongoDataQueryClientTest extends MongoApplicationTest {
 
     @Test
     void aggregateQuery() {
-        List<QuantityView> views = dataQueryClient.query(QuantityViewQuery.builder().build());
+        List<QuantityView> views = dataQueryClient.aggregate(QuantityQuery.builder().build(), QuantityView.class);
         assertThat(views).hasSize(1)
                          .first()
                          .hasFieldOrPropertyWithValue("count", 5L)
@@ -122,44 +117,10 @@ class MongoDataQueryClientTest extends MongoApplicationTest {
     }
 
     @Test
-    void queryUserWithCreatedUsersAndCreateUser() {
-        UserViewQuery userViewQuery = UserViewQuery
-                .builder()
-                .withCreatedUsers(new UserQuery())
-                .withCreateUser(new UserQuery())
-                .build();
-        List<UserView> views = dataQueryClient.query(userViewQuery);
-        assertThat(views).hasSize(4)
-                         .extracting(userEntity -> userEntity.getCreatedUsers().size())
-                         .containsExactly(3, 1, 0, 0);
-        assertThat(views)
-                .extracting(userEntity -> userEntity.getCreateUser().getUsername())
-                .containsExactly("f0rb", "f0rb", "f0rb", "user2");
-        assertThat(views).extracting(UserView::getRoles).containsOnlyNulls();
-    }
-
-    @Test
-    void supportPagingForAggregation() {
-        UserViewQuery userViewQuery = UserViewQuery.builder().pageNumber(2).pageSize(3).build();
-        List<UserView> views = dataQueryClient.query(userViewQuery);
-        assertThat(views).hasSize(1);
-        assertThat(views.get(0).getUsername()).isEqualTo("user4");
-    }
-
-    @Test
-    void supportQueryUserWithValidRole() {
-        RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
-        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleQuery).build();
-        List<UserView> userEntities = dataQueryClient.query(userViewQuery);
-        assertThat(userEntities).extracting("username")
-                                .containsExactly("f0rb", "user3");
-    }
-
-    @Test
     void supportCountUserWithValidRole() {
         RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
-        UserViewQuery userViewQuery = UserViewQuery.builder().role(roleQuery).build();
-        long count = dataQueryClient.count(userViewQuery);
+        UserQuery userQuery = UserQuery.builder().role(roleQuery).build();
+        long count = dataQueryClient.count(userQuery, UserEntity.class);
         assertThat(count).isEqualTo(2);
     }
 }

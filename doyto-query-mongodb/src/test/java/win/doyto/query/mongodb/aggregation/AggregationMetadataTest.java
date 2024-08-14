@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,11 @@ import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Test;
 import win.doyto.query.mongodb.test.TestUtil;
-import win.doyto.query.mongodb.test.user.UserView;
-import win.doyto.query.mongodb.test.user.UserViewQuery;
+import win.doyto.query.mongodb.test.user.UserEntity;
+import win.doyto.query.mongodb.test.user.UserQuery;
 import win.doyto.query.test.role.RoleQuery;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static win.doyto.query.mongodb.test.TestUtil.readString;
@@ -42,12 +41,12 @@ class AggregationMetadataTest {
     @Test
     void supportRelatedQueryForManyToMany() {
         RoleQuery rolesQuery = RoleQuery.builder().build();
-        UserViewQuery userViewQuery = UserViewQuery.builder().withRoles(rolesQuery).build();
-        AggregationMetadata<Object> md = new AggregationMetadata<>(UserView.class, null);
+        UserQuery userQuery = UserQuery.builder().withRoles(rolesQuery).build();
+        AggregationMetadata<Object> md = new AggregationMetadata<>(UserEntity.class, null);
 
-        List<Bson> pipeline = md.buildAggregation(userViewQuery);
+        List<Bson> pipeline = md.buildAggregation(userQuery);
 
-        List<BsonDocument> result = pipeline.stream().map(Bson::toBsonDocument).collect(Collectors.toList());
+        List<BsonDocument> result = pipeline.stream().map(Bson::toBsonDocument).toList();
         BsonArray expected = BsonArray.parse(readString("/query_user_with_roles.json"));
         assertThat(result).isEqualTo(expected);
     }
@@ -56,14 +55,14 @@ class AggregationMetadataTest {
     void supportRelatedQueryAndNestedQueryForManyToMany() {
         RoleQuery queryByRole = RoleQuery.builder().valid(false).build();
         RoleQuery queryWithRole = RoleQuery.builder().valid(true).build();
-        UserViewQuery userViewQuery = UserViewQuery
+        UserQuery userQuery = UserQuery
                 .builder()
                 .role(queryByRole)
                 .withRoles(queryWithRole)
                 .build();
-        AggregationMetadata<Object> md = new AggregationMetadata<>(UserView.class, null);
+        AggregationMetadata<Object> md = new AggregationMetadata<>(UserEntity.class, null);
 
-        List<Bson> pipeline = md.buildAggregation(userViewQuery);
+        List<Bson> pipeline = md.buildAggregation(userQuery);
 
         String result = TestUtil.toJson(pipeline);
         String expected = readString("/query_user_with_valid_roles_filter_by_invalid_roles.json");

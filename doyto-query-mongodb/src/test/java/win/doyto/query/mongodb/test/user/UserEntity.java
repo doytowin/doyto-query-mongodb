@@ -22,15 +22,15 @@ import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.annotation.Entity;
 import win.doyto.query.annotation.EntityType;
 import win.doyto.query.mongodb.entity.MongoPersistable;
-import win.doyto.query.mongodb.test.menu.MenuView;
-import win.doyto.query.mongodb.test.perm.PermView;
-import win.doyto.query.mongodb.test.role.RoleView;
+import win.doyto.query.mongodb.test.menu.MenuEntity;
+import win.doyto.query.mongodb.test.perm.PermEntity;
+import win.doyto.query.mongodb.test.role.RoleEntity;
 
 import java.math.BigInteger;
 import java.util.List;
 
 /**
- * UserView
+ * UserEntity
  *
  * @author f0rb on 2022-05-20
  * @since 1.0.0
@@ -38,29 +38,29 @@ import java.util.List;
 @Getter
 @Setter
 @Entity(type = EntityType.MONGO_DB, database = "doyto", name = "t_user")
-public class UserView extends MongoPersistable<BigInteger> {
+public class UserEntity extends MongoPersistable<BigInteger> {
 
     private String username;
     private String email;
 
     // many-to-many
     @DomainPath({"user", "role"})
-    private List<RoleView> roles;
+    private List<RoleEntity> roles;
 
     // many-to-many
     @DomainPath({"user", "role", "perm"})
-    private List<PermView> perms;
+    private List<PermEntity> perms;
 
     // many-to-many
     @DomainPath({"user", "role", "perm", "menu"})
-    private List<MenuView> menus;
+    private List<MenuEntity> menus;
 
     // many-to-one
     @DomainPath(value = "user", localField = "createUserId")
-    private UserView createUser;
+    private UserEntity createUser;
 
     // one-to-many
     @DomainPath(value = "user", foreignField = "createUserId")
-    private List<UserView> createdUsers;
+    private List<UserEntity> createdUsers;
 
 }

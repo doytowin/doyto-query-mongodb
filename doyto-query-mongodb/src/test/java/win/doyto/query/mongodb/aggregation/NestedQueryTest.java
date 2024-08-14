@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.mongodb.test.TestUtil;
 import win.doyto.query.mongodb.test.perm.PermQuery;
+import win.doyto.query.mongodb.test.user.UserEntity;
 import win.doyto.query.mongodb.test.user.UserQuery;
-import win.doyto.query.mongodb.test.user.UserView;
 import win.doyto.query.test.perm.PermView;
 import win.doyto.query.test.role.RoleQuery;
 
@@ -56,7 +56,7 @@ class NestedQueryTest {
     void supportNestedQueryForOneToMany() {
         UserQuery createUserQuery = UserQuery.builder().username("f0rb").build();
         UserQuery query = UserQuery.builder().createUser(createUserQuery).build();
-        AggregationMetadata<Object> md = new AggregationMetadata<>(UserView.class, null);
+        AggregationMetadata<Object> md = new AggregationMetadata<>(UserEntity.class, null);
 
         List<Bson> pipeline = md.buildAggregation(query);
 
@@ -69,7 +69,7 @@ class NestedQueryTest {
     void supportNestedQueryForManyToOne() {
         UserQuery createdUsersQuery = UserQuery.builder().valid(false).build();
         UserQuery query = UserQuery.builder().createdUsers(createdUsersQuery).build();
-        AggregationMetadata<Object> md = new AggregationMetadata<>(UserView.class, null);
+        AggregationMetadata<Object> md = new AggregationMetadata<>(UserEntity.class, null);
 
         List<Bson> pipeline = md.buildAggregation(query);
 

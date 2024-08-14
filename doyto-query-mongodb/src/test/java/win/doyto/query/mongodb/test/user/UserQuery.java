@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,5 +51,9 @@ public class UserQuery extends PageQuery {
 
     private String username;
     private Boolean valid;
+
+    private RoleQuery withRoles;
+    private UserQuery withCreateUser;
+    private UserQuery withCreatedUsers;
 
 }

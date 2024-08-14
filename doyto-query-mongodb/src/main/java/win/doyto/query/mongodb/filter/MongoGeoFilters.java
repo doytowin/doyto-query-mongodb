@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.bson.conversions.Bson;
 import win.doyto.query.geo.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * MongoQuerySuffix
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class MongoGeoFilters {
 
-    public static Bson near(String column, Object value)  {
+    public static Bson near(String column, Object value) {
         if (value instanceof NearSphere) {
             return nearSphere(column, value);
         } else {
@@ -67,7 +66,7 @@ public class MongoGeoFilters {
     @SuppressWarnings("unchecked")
     public static Bson withinPolygon(String column, Object value) {
         List<List<Double>> points = ((List<Point>) value)
-                .stream().map(Point::toList).collect(Collectors.toList());
+                .stream().map(Point::toList).toList();
 
         return Filters.geoWithinPolygon(column, points);
     }
@@ -75,8 +74,8 @@ public class MongoGeoFilters {
     static Bson withIn(String column, Object value) {
         if (GeoTransformer.support(value)) {
             return Filters.geoWithin(column, GeoTransformer.transform(value));
-        } else if (value instanceof Bson) {
-            return Filters.geoWithin(column, (Bson) value);
+        } else if (value instanceof Bson bson) {
+            return Filters.geoWithin(column, bson);
         } else {
             throw new UnsupportedGeoTypeException(value.getClass().getName());
         }
@@ -85,8 +84,8 @@ public class MongoGeoFilters {
     public static Bson intersects(String column, Object value) {
         if (GeoTransformer.support(value)) {
             return Filters.geoIntersects(column, GeoTransformer.transform(value));
-        } else if (value instanceof Bson) {
-            return Filters.geoIntersects(column, (Bson) value);
+        } else if (value instanceof Bson bson) {
+            return Filters.geoIntersects(column, bson);
         } else {
             throw new UnsupportedGeoTypeException(value.getClass().getName());
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import org.bson.conversions.Bson;
 import org.bson.json.JsonWriterSettings;
 import org.junit.jupiter.api.Test;
 import win.doyto.query.core.PageQuery;
-import win.doyto.query.mongodb.test.menu.MenuView;
-import win.doyto.query.mongodb.test.perm.PermView;
-import win.doyto.query.mongodb.test.role.RoleView;
-import win.doyto.query.mongodb.test.user.UserView;
+import win.doyto.query.mongodb.test.menu.MenuEntity;
+import win.doyto.query.mongodb.test.perm.PermEntity;
+import win.doyto.query.mongodb.test.role.RoleEntity;
+import win.doyto.query.mongodb.test.user.UserEntity;
 import win.doyto.query.test.menu.MenuQuery;
 import win.doyto.query.test.perm.PermissionQuery;
 import win.doyto.query.test.role.RoleQuery;
@@ -46,10 +46,10 @@ class DomainPathBuilderTest {
 
     @Test
     void buildDocForSubDomainWithOneJointAndQuery() throws NoSuchFieldException {
-        Field field = UserView.class.getDeclaredField("roles");
+        Field field = UserEntity.class.getDeclaredField("roles");
         RoleQuery roleQuery = RoleQuery.builder().valid(true).build();
 
-        Bson bson = buildLookUpForSubDomain(roleQuery, RoleView.class, field);
+        Bson bson = buildLookUpForSubDomain(roleQuery, RoleEntity.class, field);
 
         String actual = bson.toBsonDocument().toJson(settings);
         String expected = readString("/query_roles_in_user.json");
@@ -58,10 +58,10 @@ class DomainPathBuilderTest {
 
     @Test
     void buildDocForSubDomainWithTwoJointsAndQuery() throws NoSuchFieldException {
-        Field field = UserView.class.getDeclaredField("perms");
+        Field field = UserEntity.class.getDeclaredField("perms");
         PermissionQuery permissionQuery = PermissionQuery.builder().valid(true).build();
 
-        Bson bson = buildLookUpForSubDomain(permissionQuery, PermView.class, field);
+        Bson bson = buildLookUpForSubDomain(permissionQuery, PermEntity.class, field);
 
         String actual = bson.toBsonDocument().toJson(settings);
         String expected = readString("/query_perms_in_user.json");
@@ -70,10 +70,10 @@ class DomainPathBuilderTest {
 
     @Test
     void buildDocForSubDomainWithThreeJointsAndQuery() throws NoSuchFieldException {
-        Field field = UserView.class.getDeclaredField("menus");
+        Field field = UserEntity.class.getDeclaredField("menus");
         MenuQuery menuQuery = MenuQuery.builder().valid(true).build();
 
-        Bson bson = buildLookUpForSubDomain(menuQuery, MenuView.class, field);
+        Bson bson = buildLookUpForSubDomain(menuQuery, MenuEntity.class, field);
 
         String actual = bson.toBsonDocument().toJson(settings);
         String expected = readString("/query_menus_in_user.json");
@@ -82,9 +82,9 @@ class DomainPathBuilderTest {
 
     @Test
     void buildDocForManyToOne() throws NoSuchFieldException {
-        Field field = UserView.class.getDeclaredField("createUser");
+        Field field = UserEntity.class.getDeclaredField("createUser");
 
-        Bson bson = buildLookUpForSubDomain(new PageQuery(), UserView.class, field);
+        Bson bson = buildLookUpForSubDomain(new PageQuery(), UserEntity.class, field);
 
         String actual = bson.toBsonDocument().toJson(settings);
         String expected = readString("/query_create_user_in_user.json");
@@ -93,9 +93,9 @@ class DomainPathBuilderTest {
 
     @Test
     void buildDocForOneToMany() throws NoSuchFieldException {
-        Field field = UserView.class.getDeclaredField("createdUsers");
+        Field field = UserEntity.class.getDeclaredField("createdUsers");
 
-        Bson bson = buildLookUpForSubDomain(new PageQuery(), UserView.class, field);
+        Bson bson = buildLookUpForSubDomain(new PageQuery(), UserEntity.class, field);
 
         String actual = bson.toBsonDocument().toJson(settings);
         String expected = readString("/query_created_users_in_user.json");
@@ -104,10 +104,10 @@ class DomainPathBuilderTest {
 
     @Test
     void buildDocForSubDomainReverseWithThreeJointsAndQuery() throws NoSuchFieldException {
-        Field field = PermView.class.getDeclaredField("users");
+        Field field = PermEntity.class.getDeclaredField("users");
         UserQuery userQuery = UserQuery.builder().id(1).build();
 
-        Bson bson = buildLookUpForSubDomain(userQuery, UserView.class, field);
+        Bson bson = buildLookUpForSubDomain(userQuery, UserEntity.class, field);
 
         String actual = bson.toBsonDocument().toJson(settings);
         String expected = readString("/query_users_in_perm.json");

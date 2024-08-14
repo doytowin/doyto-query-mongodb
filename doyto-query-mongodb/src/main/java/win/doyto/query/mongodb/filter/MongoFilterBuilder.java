@@ -27,8 +27,8 @@ import org.bson.BsonString;
 import org.bson.conversions.Bson;
 import win.doyto.query.annotation.DomainPath;
 import win.doyto.query.core.DoytoQuery;
-import win.doyto.query.core.NestedQuery;
 import win.doyto.query.core.Or;
+import win.doyto.query.core.Query;
 import win.doyto.query.core.QuerySuffix;
 import win.doyto.query.entity.Persistable;
 import win.doyto.query.util.ColumnUtil;
@@ -117,7 +117,7 @@ public class MongoFilterBuilder {
                 filters.add(filter);
             } else if (isValidValue(value, field)) {
                 String newPrefix = prefix + field.getName();
-                if (value instanceof NestedQuery) {
+                if (value instanceof Query) {
                     buildFilter(value, newPrefix, filters);
                 } else if (value instanceof DoytoQuery) {
                     if (field.isAnnotationPresent(DomainPath.class)) {

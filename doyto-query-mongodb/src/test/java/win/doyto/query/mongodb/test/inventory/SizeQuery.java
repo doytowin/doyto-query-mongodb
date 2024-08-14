@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import win.doyto.query.core.NestedQuery;
+import win.doyto.query.core.Query;
 
 /**
  * SizeQuery
@@ -34,7 +34,7 @@ import win.doyto.query.core.NestedQuery;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SizeQuery implements NestedQuery {
+public class SizeQuery implements Query {
     // https://stackoverflow.com/questions/30205006/why-does-jackson-2-not-recognize-the-first-capital-letter-if-the-leading-camel-c
     // @Jacksonized also works
     @JsonProperty("hLt")

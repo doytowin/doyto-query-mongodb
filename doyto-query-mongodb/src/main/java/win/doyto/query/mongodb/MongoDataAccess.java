@@ -37,6 +37,8 @@ import win.doyto.query.core.PageList;
 import win.doyto.query.entity.Persistable;
 import win.doyto.query.mongodb.aggregation.AggregationMetadata;
 import win.doyto.query.mongodb.aggregation.CollectionProvider;
+import win.doyto.query.mongodb.entity.BeanDocMapper;
+import win.doyto.query.mongodb.entity.DocMapper;
 import win.doyto.query.mongodb.entity.ObjectIdAware;
 import win.doyto.query.mongodb.entity.ObjectIdMapper;
 import win.doyto.query.mongodb.filter.MongoFilterBuilder;
@@ -68,6 +70,8 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
     private final Supplier<ClientSession> mongoSessionSupplier;
     private final AggregationMetadata<MongoCollection<Document>> md;
 
+    private DocMapper<E> docMapper;
+
     MongoDataAccess(MongoClient mongoClient, Class<E> entityClass) {
         this(entityClass, mongoClient, MongoSessionThreadLocalSupplier.create(mongoClient));
     }
@@ -78,6 +82,7 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
         CollectionProvider collectionProvider = new CollectionProvider(mongoClient);
         this.md = AggregationMetadata.build(entityClass, collectionProvider);
         this.collection = md.getCollection();
+        this.docMapper = new BeanDocMapper<>(entityClass);
     }
 
     private void setObjectId(E entity, Document document) {
@@ -99,7 +104,7 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
     public List<E> query(Q query) {
         List<Bson> pipeline = md.buildAggregation(query);
         return md.getCollection().aggregate(mongoSessionSupplier.get(), pipeline)
-                 .map(document -> BeanUtil.parse(document.toJson(), entityClass))
+                 .map(docMapper::map)
                  .into(new ArrayList<>());
     }
 
@@ -144,7 +149,8 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
                 e = document.get(columns[0], clazz);
             }
         } else {
-            e = BeanUtil.parse(document.toJson(), clazz);
+            DocMapper<V> clsDocMapper = MongoConstant.getDocMapper(clazz);
+            e = clsDocMapper.map(document);
         }
         if (log.isDebugEnabled()) {
             log.debug("Entity parsed: {}", BeanUtil.stringify(e));
@@ -160,7 +166,7 @@ public class MongoDataAccess<E extends Persistable<I>, I extends Serializable, Q
     public E get(IdWrapper<I> w) {
         return collection
                 .find(mongoSessionSupplier.get(), getIdFilter(w.getId()))
-                .map(document -> BeanUtil.parse(document.toJson(), entityClass)).first();
+                .map(docMapper::map).first();
     }
 
     @Override

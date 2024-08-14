@@ -25,8 +25,9 @@ import win.doyto.query.core.AggregateClient;
 import win.doyto.query.core.AggregatedQuery;
 import win.doyto.query.mongodb.aggregation.AggregationMetadata;
 import win.doyto.query.mongodb.aggregation.CollectionProvider;
+import win.doyto.query.mongodb.entity.BeanDocMapper;
+import win.doyto.query.mongodb.entity.DocMapper;
 import win.doyto.query.mongodb.session.MongoSessionThreadLocalSupplier;
-import win.doyto.query.util.BeanUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,15 +51,21 @@ public class MongoAggregateClient implements AggregateClient {
         this.collectionProvider = new CollectionProvider(mongoClient);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <V, A extends AggregatedQuery>
     List<V> aggregate(Class<V> viewClass, A aggregatedQuery) {
+        DocMapper<V> docMapper = MongoConstant.getDocMapper(viewClass, this::newMapper);
         AggregationMetadata<MongoCollection<Document>> md =
                 AggregationMetadata.build(viewClass, collectionProvider);
         List<Bson> pipeline = md.buildByAggregatedQuery(aggregatedQuery);
         return md.getCollection()
                  .aggregate(mongoSessionSupplier.get(), pipeline)
-                 .map(document -> BeanUtil.parse(document.toJson(), viewClass))
+                 .map(docMapper::map)
                  .into(new ArrayList<>());
+    }
+
+    protected <V> BeanDocMapper<V> newMapper(Class<V> viewClass) {
+        return new BeanDocMapper<>(viewClass);
     }
 }

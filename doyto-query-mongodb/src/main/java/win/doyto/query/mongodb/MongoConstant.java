@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019-2023 Forb Yuan
+ * Copyright © 2019-2024 Forb Yuan
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,12 @@
 package win.doyto.query.mongodb;
 
 import lombok.experimental.UtilityClass;
+import win.doyto.query.mongodb.entity.BeanDocMapper;
+import win.doyto.query.mongodb.entity.DocMapper;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * MongoConstant
@@ -28,9 +34,19 @@ import lombok.experimental.UtilityClass;
 public class MongoConstant {
     public static final String MONGO_ID = "_id";
     public static final String COUNT_KEY = "count";
+    public final Map<Class<?>, DocMapper<?>> DOC_MAPPER_MAP = new ConcurrentHashMap<>();
 
-    public static String ex(String field) {
+    public String ex(String field) {
         return "$" + field;
     }
 
+    @SuppressWarnings("unchecked")
+    public <V> DocMapper<V> getDocMapper(Class<V> clazz) {
+        return (DocMapper<V>) DOC_MAPPER_MAP.computeIfAbsent(clazz, BeanDocMapper::new);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V> DocMapper<V> getDocMapper(Class<V> clazz, Function<Class<?>, DocMapper<?>> newMapper) {
+        return (DocMapper<V>) DOC_MAPPER_MAP.computeIfAbsent(clazz, newMapper);
+    }
 }

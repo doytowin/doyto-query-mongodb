@@ -28,8 +28,9 @@ import win.doyto.query.core.DoytoQuery;
 import win.doyto.query.entity.Persistable;
 import win.doyto.query.mongodb.aggregation.AggregationMetadata;
 import win.doyto.query.mongodb.aggregation.CollectionProvider;
+import win.doyto.query.mongodb.entity.BeanDocMapper;
+import win.doyto.query.mongodb.entity.DocMapper;
 import win.doyto.query.mongodb.session.MongoSessionThreadLocalSupplier;
-import win.doyto.query.util.BeanUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -62,14 +63,16 @@ public class MongoDataQueryClient implements DataQueryClient {
         return commonQuery(query, viewClass);
     }
 
+    @SuppressWarnings("unchecked")
     private <V, Q extends DoytoQuery> List<V>
     commonQuery(Q query, Class<V> viewClass) {
         AggregationMetadata<MongoCollection<Document>> md =
                 AggregationMetadata.build(viewClass, collectionProvider);
         List<Bson> pipeline = md.buildAggregation(query);
+        DocMapper<V> docMapper = MongoConstant.getDocMapper(viewClass, this::newMapper);
         return md.getCollection()
                  .aggregate(mongoSessionSupplier.get(), pipeline)
-                 .map(document -> BeanUtil.parse(document.toJson(), viewClass))
+                 .map(docMapper::map)
                  .into(new ArrayList<>());
     }
 
@@ -89,5 +92,9 @@ public class MongoDataQueryClient implements DataQueryClient {
     @Override
     public <V, Q extends DoytoQuery & AggregationQuery> List<V> aggregate(Q query, Class<V> viewClass) {
         return commonQuery(query, viewClass);
+    }
+
+    protected <V> BeanDocMapper<V> newMapper(Class<V> viewClass) {
+        return new BeanDocMapper<>(viewClass);
     }
 }

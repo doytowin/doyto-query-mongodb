@@ -59,12 +59,13 @@ public class MongoFilterBuilder {
     static {
         suffixFuncMap = new EnumMap<>(QuerySuffix.class);
         suffixFuncMap.put(Eq, Filters::eq);
-        suffixFuncMap.put(Contain, (s, v) -> regexp(s, v.toString()));
-        suffixFuncMap.put(NotContain, (s, v) -> not(regexp(s, v.toString())));
-        suffixFuncMap.put(Start, (s, v) -> regexp(s, "^" + v.toString()));
-        suffixFuncMap.put(NotStart, (s, v) -> not(regexp(s, "^" + v.toString())));
-        suffixFuncMap.put(End, (s, v) -> regexp(s, v.toString() + "$"));
-        suffixFuncMap.put(NotEnd, (s, v) -> not(regexp(s, v.toString() + "$")));
+        suffixFuncMap.put(Contain, MongoFilterBuilder::regexp);
+        suffixFuncMap.put(NotContain, (s, v) -> not(regexp(s, v)));
+        suffixFuncMap.put(Start, (s, v) -> regexp(s, "^" + v));
+        suffixFuncMap.put(NotStart, (s, v) -> not(regexp(s, "^" + v)));
+        suffixFuncMap.put(End, (s, v) -> regexp(s, v + "$"));
+        suffixFuncMap.put(NotEnd, (s, v) -> not(regexp(s, v + "$")));
+        suffixFuncMap.put(Rx, MongoFilterBuilder::regexp);
         suffixFuncMap.put(Lt, Filters::lt);
         suffixFuncMap.put(Le, Filters::lte);
         suffixFuncMap.put(Gt, Filters::gt);
@@ -88,8 +89,8 @@ public class MongoFilterBuilder {
         suffixFuncMap.put(IntX, MongoGeoFilters::intersects);
     }
 
-    private static Bson regexp(String fieldName, String pattern) {
-        return new BsonDocument(fieldName, new BsonDocument("$regex", new BsonString(pattern)));
+    private static Bson regexp(String fieldName, Object pattern) {
+        return new BsonDocument(fieldName, new BsonDocument("$regex", new BsonString(pattern.toString())));
     }
 
     public static Bson buildFilter(Object query) {
@@ -149,14 +150,10 @@ public class MongoFilterBuilder {
     private static void buildOrFilter(Object value, List<Bson> rootFilters) {
         List<Bson> filters = new ArrayList<>();
         buildFilter(value, EMPTY, filters);
-        switch (filters.size()) {
-            case 0:
-                break;
-            case 1:
-                rootFilters.add(filters.get(0));
-                break;
-            default:
-                rootFilters.add(or(filters));
+        if (filters.size() == 1) {
+            rootFilters.add(filters.get(0));
+        } else if (!filters.isEmpty()) {
+            rootFilters.add(or(filters));
         }
     }
 

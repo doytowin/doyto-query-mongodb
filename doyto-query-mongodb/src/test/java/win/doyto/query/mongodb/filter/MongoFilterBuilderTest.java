@@ -34,7 +34,6 @@ import win.doyto.query.mongodb.test.inventory.InventoryQuery;
 import win.doyto.query.test.TestQuery;
 import win.doyto.query.util.BeanUtil;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class MongoFilterBuilderTest {
 
-    private CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
+    private final CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
             CodecRegistries.fromProviders(
                     new BsonValueCodecProvider(),
                     new DocumentCodecProvider(),
@@ -76,6 +75,7 @@ class MongoFilterBuilderTest {
             "{\"memoNull\": true}, {\"memo\": null}",
             "{\"memoNull\": false}, {\"memo\": {\"$ne\": null}}",
             "{\"statusExists\": true}, {\"status\": {\"$exists\": true}}",
+            "{\"usernameRx\": \"test\\\\d+\"}, {\"username\": {\"$regex\": \"test\\\\d+\"}}",
     })
     void testFilterSuffix(String data, String expected) {
         TestQuery query = BeanUtil.parse(data, TestQuery.class);
@@ -192,7 +192,7 @@ class MongoFilterBuilderTest {
     @Test
     void withInGeoPoly() {
         List<Point> exterior = Lists.newArrayList(new Point(0, 0), new Point(3, 6), new Point(6, 1));
-        GeoPolygon geoPolygon = new GeoPolygon(Arrays.asList(exterior));
+        GeoPolygon geoPolygon = new GeoPolygon(List.of(exterior));
 
         Bson filters = MongoGeoFilters.withIn("loc", geoPolygon);
 

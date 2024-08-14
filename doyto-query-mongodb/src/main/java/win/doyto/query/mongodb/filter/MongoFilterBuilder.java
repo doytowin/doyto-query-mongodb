@@ -134,8 +134,12 @@ public class MongoFilterBuilder {
 
     private static void buildOrFilters(List<Bson> filters, Object value, String newPrefix) {
         if (value instanceof Collection<?> list) {
+            List<Bson> orFilters = new ArrayList<>();
             String fieldName = newPrefix.substring(0, newPrefix.length() - 2);
-            List<Bson> orFilters = list.stream().map(v -> resolveFilter(fieldName, v)).toList();
+            for (Object v : list) {
+                Bson bson = v instanceof Query ? buildFilter(v) : resolveFilter(fieldName, v);
+                orFilters.add(bson);
+            }
             filters.add(or(orFilters));
         } else {
             buildOrFilter(value, filters);

@@ -45,5 +45,6 @@ public class InventoryQuery extends PageQuery {
     private SizeQuery size;
     private List<String> statusOr;
     private Conditions conditionOr;
+    private List<Conditions> conditionsOr;
 
 }

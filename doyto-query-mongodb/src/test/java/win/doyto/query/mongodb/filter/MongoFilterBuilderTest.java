@@ -110,6 +110,9 @@ class MongoFilterBuilderTest {
                     "| {\"item\": {\"$regex\": \"test\"}}",
             "{\"statusOr\":[\"A\", \"D\"],\"itemContain\":\"test\"}" +
                     "| {\"$and\": [{\"item\": {\"$regex\": \"test\"}}, {\"$or\": [{\"status\": \"A\"}, {\"status\": \"D\"}]}]}",
+            "{\"conditionsOr\":[{\"statusIn\":[\"A\",\"D\"]},{\"statusIn\":[\"A\",\"C\"],\"qtyGt\":10}],\"status\":\"A\"}" +
+                    "| {\"$and\": [{\"status\": \"A\"}, {\"$or\": [{\"status\": {\"$in\": [\"A\", \"D\"]}}, " +
+                    "{\"$and\": [{\"status\": {\"$in\": [\"A\", \"C\"]}}, {\"qty\": {\"$gt\": 10}}]}]}]}",
     }, delimiter = '|')
     void testOrFilter(String data, String expected) {
         InventoryQuery query = BeanUtil.parse(data, InventoryQuery.class);
